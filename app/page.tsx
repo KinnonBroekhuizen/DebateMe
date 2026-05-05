@@ -3,6 +3,7 @@ export default async function Home() {
     <div>
       <main>
         <h1>Debate Me</h1>
+        <p>Skele</p>
       </main>
     </div>
   );
