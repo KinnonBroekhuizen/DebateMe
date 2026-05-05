@@ -11,12 +11,8 @@ import os
 api_key = "sk-MH0yUvb4TD-inNrKrdRRyg.wKYDDjoktublGYvL637W8gwPH6v44dMm" 
 
 fish_response = requests.post(
-    "https://api.fish.audio/v1/tts",
-    headers={
-        "Authorization": f"Bearer {}",
-        "Content-Type": "application/json",
-    },
-    json={"text": "Your debate speech goes here", "format": "mp3"}
+    "http://localhost:8000/speak",       # his server address
+    json={"text": "The text response"}
 )
 
 # Convert the mp3 bytes to a wav file
@@ -27,7 +23,7 @@ print("Audio converted and saved as debate_audio.wav")
 # ─────────────────────────────────────────────────────────────────────────────
 
 video_url = "https://assets.sync.so/docs/example-video.mp4"
-audio_url = "https://assets.sync.so/docs/example-audio.wav"  # ← we'll update this next
+audio_url = "https://assets.sync.so/docs/example-audio.wav" 
 
 # Sends this info from the client side
 client = Sync(
