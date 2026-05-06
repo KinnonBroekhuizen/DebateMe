@@ -21,7 +21,7 @@ export default function Home() {
             className="font-semibold px-6 py-3 rounded-md transition-opacity hover:opacity-90"
             style={{
               background: "var(--primary)",
-              color: "var(--primary-foreground)",
+              color: "black",
             }}
           >
             Start Debating
