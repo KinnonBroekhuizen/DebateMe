@@ -1,13 +1,9 @@
 import { Clock, HelpCircle, FileText } from "react-feather";
+import Link from "next/link";
 
 export default function Home() {
   return (
     <div className="min-h-screen bg-white font-sans">
-      {/* Navbar */}
-      <header className="bg-gray-300 px-8 py-5">
-        <h1 className="text-2xl font-bold text-black">Debate me.</h1>
-      </header>
-
       {/* Hero Section */}
       <main className="px-10 pt-16 pb-12 max-w-5xl">
         <h2 className="text-6xl font-extrabold text-black leading-tight mb-6">
@@ -20,9 +16,16 @@ export default function Home() {
 
         {/* Buttons */}
         <div className="flex justify-end gap-4">
-          <button className="bg-gray-500 hover:bg-gray-600 text-white font-semibold px-6 py-3 rounded-md transition-colors">
+          <Link
+            href="/opponents"
+            className="font-semibold px-6 py-3 rounded-md transition-opacity hover:opacity-90"
+            style={{
+              background: "var(--primary)",
+              color: "var(--primary-foreground)",
+            }}
+          >
             Start Debating
-          </button>
+          </Link>
           <button className="bg-gray-300 hover:bg-gray-400 text-gray-700 font-semibold px-6 py-3 rounded-md transition-colors">
             Learn More
           </button>
