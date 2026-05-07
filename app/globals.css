@@ -1,15 +1,29 @@
 @import "tailwindcss";
 
-.head-banner{
-  display: flex;
-  height: 121px;
-  width:auto;
-  background-color: #D9D9D9;
-  justify-items: center;
+:root {
+  --background: #f9f8f6;
+  --foreground: #efe9e3;
+
+  --primary: #d9cfc7;
+  --primary-hover: #c9b59c;
+  --primary-foreground: #ffffff;
+
+  --accent: #c9b59c;
+
+  --card: #d9cfc7;
+  --card-foreground: #efe9e3;
 }
 
-.head-banner h1 {
-  font-size: 40;
+/* @theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+} */
+
+body {
+  background: var(--background);
+  color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
   color: #0a0a0a;
 }
