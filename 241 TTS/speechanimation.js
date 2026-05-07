@@ -35,14 +35,14 @@ function play() {
         const avg = dataArray.slice(2, 18).reduce((a, b) => a + b) / 16;
 
         // If loud enough, show open mouth — otherwise closed
-        img.src = avg > 150 ? 'Mouth-Open-Trump.png' : 'Mouth-Closed-Trump.png';
+        img.src = avg > 150 ? 'PoliticianExpressions/Mouth-Open-Trump.png' : 'PoliticianExpressions/Mouth-Closed-Trump.png';
 
         requestAnimationFrame(tick);
     }
 
     tick();
 
-    source.onended = () => img.src = 'Mouth-Closed-Trump.png';
+    source.onended = () => img.src = 'PoliticianExpressions/Mouth-Closed-Trump.png';
 }
 
 loadAudio();
