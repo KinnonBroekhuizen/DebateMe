@@ -1,12 +1,20 @@
 from fastapi import FastAPI
 from fastapi.responses import Response
 from fish_audio_sdk import Session, TTSRequest
+from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 import os
 
 load_dotenv()
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 session = Session(os.getenv("FISH_API_KEY"))
 REFERENCE_ID = os.getenv("REFERENCE_ID")
