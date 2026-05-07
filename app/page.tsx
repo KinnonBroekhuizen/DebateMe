@@ -1,6 +1,5 @@
 import { Clock, HelpCircle, FileText } from "react-feather";
 import Link from "next/link";
-
 export default function Home() {
   return (
     <div className="min-h-screen bg-white font-sans">
@@ -34,6 +33,8 @@ export default function Home() {
             </button>
           </div>
         </div>
+
+        <div></div>
       </main>
 
       {/* Features Section */}
