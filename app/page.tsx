@@ -7,10 +7,10 @@ export default function Home() {
       <main className="px-10 pt-16 pb-12 max-w-5xl flex justify-evenly">
         {/* Left Side */}
         <div className="">
-          <h2 className="text-6xl font-extrabold text-black leading-tight mb-6">
+          <h2 className="text-6xl font-extrabold text-black leading-tight mb-6 animate-fade-down animate-once animate-ease-out">
             Debate with political people <br /> who shape nations.
           </h2>
-          <p className="text-xl text-gray-700 mb-16 max-w-xl leading-relaxed">
+          <p className="text-xl text-gray-700 mb-16 max-w-xl leading-relaxed animate-fade-down animate-once animate-ease-out animate-delay-500">
             Challenge Christopher Luxon and other political leaders on the
             issues that define our generations. This is where real debate
             happens.
