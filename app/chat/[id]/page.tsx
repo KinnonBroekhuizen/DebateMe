@@ -80,24 +80,26 @@ export default function Chat(){
         if (!input.trim()) return;
 
         const userMsg: Message = {
-        id: crypto.randomUUID(),
-        role: "user",
-        text: input,
+            id: crypto.randomUUID(),
+            role: "user",
+            text: input,
         };
         setMessages((prev) => [...prev, userMsg]);
         setInput("");
-        // Send to your backend and get AI reply
-        const res = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: input }),
+        const contextString = messages
+            .map((m) => `${m.role}: ${m.text}`)
+            .join(". ");
+        const res = await fetch("http://localhost:8000/ask", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ question: input, character: opponentName, context: contextString }),
         });
-        const data = await res.json();
+        const answer = await res.json();
 
         const aiMsg: Message = {
         id: crypto.randomUUID(),
         role: "opponent",
-        text: data.reply,
+        text: answer.reply,
         };
         setMessages((prev) => [...prev, aiMsg]);
     };
@@ -134,8 +136,6 @@ export default function Chat(){
                             )
                         )}
                         <div ref={bottomRef} />
-
-                        
                     </div>
                     <div className="flex sticky bottom-0 px-4 py-3 border-t border-gray-200 gap-2 z-10 shrink-0" style={{ backgroundColor: "#f9f8f6" }}>
                             <input
