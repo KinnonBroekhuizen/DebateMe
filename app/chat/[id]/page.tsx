@@ -1,29 +1,9 @@
-'use client'
+"use client";
 import Link from 'next/link';
-import GetTextInput from "./getTextInput";
+import GetTextInput from "../getTextInput";
 import { useRef, useEffect, useState } from 'react';
-// import { supabase } from '@/lib/supabase'
-
-// export default async function Home() {
-//   const {data,error} = await supabase
-//   .from('TestingTable')
-//   .select('*')
-
-//   console.log(data, error)
-//   return (
-//     <div>
-//       <main>
-//         <h1>Debate Me</h1>
-//         {data?.map((row) => (
-//           <div key={row.id}>
-//             <h2>{row.name}</h2>
-//             <p>{row.content}</p>
-//           </div>
-//         ))}
-//       </main>
-//     </div>
-//   );
-// }
+import { supabase } from '@/lib/supabase';
+import { useParams } from 'next/navigation';
 
 type Message = {
     id: string;
@@ -32,7 +12,23 @@ type Message = {
 };
 export default function Chat(){
 
+    const { id } = useParams();
     
+    const [opponentName, setOpponentName] = useState<string>("");
+    useEffect(() => {
+        const fetchData = async () => {
+        const resolvedId = Array.isArray(id) ? id[0] : id;
+        const { data, error } = await supabase
+            .from("ChatIdentifiers")
+            .select("*")
+            .eq("id", resolvedId)
+            .maybeSingle();
+            if (error) console.error(error);
+            if (data) setOpponentName(data.opponent_name);
+        };
+
+        fetchData();
+    }, [id]);
     //const [messages, setMessages] = useState<Message[]>([]);
     const [messages, setMessages] = useState<Message[]>([
   {
@@ -70,6 +66,7 @@ export default function Chat(){
     const video = useRef<HTMLVideoElement>(null);
     const bottomRef = useRef<HTMLDivElement>(null);
 
+    
     useEffect(() => {
         bottomRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
@@ -108,19 +105,20 @@ export default function Chat(){
     return(
         <main>
 
-            <div id="mainContainer" className='flex ' >
-                <div id="chatContainer" className='flex-1 flex'>
-                    <div className="px-4 py-3 border-b border-gray-200">
-                        <p className="font-medium text-sm">Debate Chat</p>
+            <div id="mainContainer" className='flex h-screen-200' >
+                <div id="chatContainer" className='flex-1 overflow-hidden'>
+                    <div className="px-4 py-3 border-b border-gray-200 shrink-0">
+                        <p className="font-bold text-xl text-center">{opponentName}</p>
                     </div>
 
-                    <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3">
+                    <div className="overflow-y-auto px-4 py-4 flex flex-col gap-3 min-h-0" style={{ height: "calc(100vh - 200px)" }}>
+                        <div className="flex-1" />
                         {messages.map((msg) =>
                             msg.role === "opponent" ? (
                                 /* AI message — left aligned */
                                 <div key={msg.id} className="flex items-start gap-2 max-w-[80%]">
-                                    <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center shrink-0 text-xs font-medium text-blue-700">
-                                        Opponent
+                                    <div className="w-15 h-15 rounded-full bg-blue-100 flex items-center justify-center shrink-0 text-xs font-medium text-blue-700 text-center">
+                                        {opponentName}
                                     </div>
                                     <div className="bg-gray-100 rounded-tl-sm rounded-tr-xl rounded-br-xl rounded-bl-xl px-3 py-2 text-sm text-gray-800 leading-relaxed">
                                         {msg.text}
@@ -136,23 +134,24 @@ export default function Chat(){
                             )
                         )}
                         <div ref={bottomRef} />
-                        <div className="px-4 py-3 border-t border-gray-200 gap-2">
-                        <input
-                            className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-400"
-                            placeholder="Type here"
-                            value={input}
-                            onChange={(e) => setInput(e.target.value)}
-                            onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-                        />
-                        <button
-                            onClick={sendMessage}
-                            className="bg-gray-700 text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-800 transition"
-                        >
-                        Send
-                        </button>
+
+                        
                     </div>
-                    </div>
-                    
+                    <div className="flex sticky bottom-0 px-4 py-3 border-t border-gray-200 gap-2 z-10 shrink-0" style={{ backgroundColor: "#f9f8f6" }}>
+                            <input
+                                className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-400"
+                                placeholder="Type here"
+                                value={input}
+                                onChange={(e) => setInput(e.target.value)}
+                                onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+                            />
+                            <button
+                                onClick={sendMessage}
+                                className="bg-gray-700 text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-800 transition shrink-0"
+                            >
+                            Send
+                            </button>
+                        </div>
                 </div>
                 <div className='flex-1 bg-black'>
                     <video
