@@ -2,28 +2,28 @@ import Link from "next/link";
 
 const opponents = [
   {
-    id: 1,
+    id: "Luxon",
     name: "Christopher Luxon",
     description: "NZ's Minister and Leader of the National Party",
     image:
       "https://cdn.britannica.com/80/269080-050-C6EA1EB3/New-Zealand-Prime-Minister-Christopher-Luxon.jpg",
   },
   {
-    id: 2,
+    id: "Trump",
     name: "Donald Trump",
     description: "45th & 47th President of the USA. Republican",
     image:
       "https://www.whitehouse.gov/wp-content/uploads/2025/01/Donald-J-Trump.jpg",
   },
   {
-    id: 3,
+    id: "Seymour",
     name: "David Seymour",
     description: "Leader of the ACT party",
     image:
       "https://www.beehive.govt.nz/sites/default/files/styles/portrait_image/public/2025-05/headshot_David-Seymour_2.jpg?itok=59JJMpZ7",
   },
   {
-    id: 4,
+    id: "Peters",
     name: "Winston Peters",
     description: "Leader of NZ First",
     image:
@@ -41,8 +41,9 @@ export default function OpponentsPage() {
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 animate-fade-in-down">
           {opponents.map((opponent) => (
-            <button
+            <Link
               key={opponent.id}
+              href={`/chat/${opponent.id}`}
               className="flex flex-col text-left rounded-xl overflow-hidden transition-opacity hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-[var(--accent)] bg-[var(--card)] shadow-sm"
             >
               {/* Fixed-size image */}
@@ -63,7 +64,7 @@ export default function OpponentsPage() {
                   {opponent.description}
                 </p>
               </div>
-            </button>
+            </Link>
           ))}
         </div>
       </main>
