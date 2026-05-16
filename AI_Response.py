@@ -1,4 +1,33 @@
 import ollama
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from pip._internal import req
+from pydantic import BaseModel
+from tavily import TavilyClient
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["POST"],
+    allow_headers=["*"],
+)
+
+class AskRequest(BaseModel):
+    question: str
+    character: str
+    context: str
+
+@app.post("/ask")
+def ask(ask: AskRequest):
+    answer = askAI(req.question, req.character, req.context)
+    return answer
+
 
 def askAI(question: str, character: str, context: str) -> str:
 
@@ -122,5 +151,10 @@ You are committed to the bit. You are LOUD. You are RAMBLING. You are TRUMP.
 
     return response["message"]["content"]
 
+def searchWeb(query: str) -> str:
+    tavily = TavilyClient(api_key=os.environ["tavily"])
+    results = tavily.search(query)
+    return results
+
 if __name__ == "__main__":
-    print(askAI("what do you think about joe bidon?", "donald trump", ""))
+    print(askAI("what are your opinions on abortion?", "donald trump", ""))
