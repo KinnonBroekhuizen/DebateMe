@@ -1,0 +1,7 @@
+# Backend (FastAPI) dependencies for AI_Response.py
+fastapi
+uvicorn[standard]
+ollama
+tavily-python
+python-dotenv
+pydantic
