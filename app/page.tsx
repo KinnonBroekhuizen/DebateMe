@@ -31,6 +31,16 @@ export default function Home() {
             <button className="bg-gray-300 hover:bg-gray-400 text-gray-700 font-semibold px-6 py-3 rounded-md transition-colors">
               View On Github
             </button>
+            <Link
+              href="/addOpponent"
+              className="font-semibold px-6 py-3 rounded-md transition-opacity hover:opacity-90"
+              style={{
+                background: "var(--primary)",
+                color: "black",
+              }}
+            >
+              Add Opponent
+            </Link>
           </div>
         </div>
 
