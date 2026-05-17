@@ -4,7 +4,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-white font-sans">
       {/* Hero Section */}
-      <main className="px-10 pt-16 pb-12 max-w-5xl flex justify-evenly">
+      <main className="px-10 pt-16 pb-12">
         {/* Left Side */}
         <div className="">
           <h2 className="text-6xl font-extrabold text-black leading-tight mb-6 animate-fade-down animate-once animate-ease-out">
@@ -17,33 +17,35 @@ export default function Home() {
           </p>
 
           {/* Buttons */}
-          <div className="flex justify-end gap-4">
+          <div className="flex items-stretch gap-4 justify-center mx-auto">
             <Link
               href="/opponents"
-              className="font-semibold px-6 py-3 rounded-md transition-opacity hover:opacity-90"
-              style={{
-                background: "var(--primary)",
-                color: "black",
-              }}
+              className="p-5 flex flex-col gap-2 justify-between rounded-md transition-opacity hover:opacity-90 max-w-120"
+              style={{ background: "var(--primary)", color: "black" }}
             >
-              Start Debating
+              <span className="font-bold text-2xl">Start Debating</span>
+              <p className="text-lg  leading-snug opacity-80">
+                Go head-to-head with a political leader. Pick your opponent,
+                choose a topic, and make your case in real time.
+              </p>
             </Link>
-            <button className="bg-gray-300 hover:bg-gray-400 text-gray-700 font-semibold px-6 py-3 rounded-md transition-colors">
-              View On Github
-            </button>
+
             <Link
               href="/addOpponent"
-              className="font-semibold px-6 py-3 rounded-md transition-opacity hover:opacity-90"
+              className="p-5 flex flex-col gap-2 justify-between rounded-md transition-opacity hover:opacity-90 max-w-90"
               style={{
-                background: "var(--primary)",
+                background: "var(--foreground)",
                 color: "black",
               }}
             >
-              Add Opponent
+              <span className="font-bold text-2xl">Add Opponent</span>
+              <p className="text-lg leading-snug opacity-80">
+                Know a leader missing from the list? Submit them and bring them
+                into the arena.
+              </p>
             </Link>
           </div>
         </div>
-
       </main>
 
       {/* Features Section */}
