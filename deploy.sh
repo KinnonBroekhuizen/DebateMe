@@ -21,7 +21,12 @@ if [ ! -d ".venv" ]; then
   echo "making python venv"
   python3 -m venv .venv
 fi
-source .venv/Scripts/activate
+# venv layout differs: bin/ on macOS+Linux, Scripts/ on Windows
+if [ -f .venv/bin/activate ]; then
+  source .venv/bin/activate
+else
+  source .venv/Scripts/activate
+fi
 echo "installing python packages"
 pip install -q -r requirements.txt
 
@@ -37,12 +42,13 @@ if [ ! -d "node_modules" ]; then
   npm install
 fi
 
-# warn if env keys missing but dont stop
-if [ ! -f .env ] || ! grep -q "^tavily=" .env; then
-  echo "warning: tavily key not found in .env"
-fi
-if ! grep -q "NEXT_PUBLIC_SUPABASE_URL" .env 2>/dev/null; then
-  echo "warning: supabase keys not in .env"
+# warn if env keys missing but dont stop (pipeline degrades gracefully)
+if [ ! -f .env ]; then
+  echo "warning: no .env (copy .env.example) - text-only, no audio/video"
+else
+  grep -q "^FISH_API_KEY=." .env || echo "warning: FISH_API_KEY missing - no TTS audio"
+  grep -q "^SYNC_API_KEY=." .env || echo "warning: SYNC_API_KEY missing - no lip-sync video"
+  grep -q "NEXT_PUBLIC_SUPABASE_URL=." .env || echo "warning: supabase keys not in .env"
 fi
 
 # start the backend

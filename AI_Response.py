@@ -2,13 +2,20 @@ import ollama
 import os
 import json
 import time
+import base64
+import secrets
 import urllib.request
 import urllib.parse
 import urllib.error
-from fastapi import FastAPI
+from collections import OrderedDict
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import Response
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
+
+import tts
+import lipsync
 
 load_dotenv()
 
@@ -17,14 +24,46 @@ app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_methods=["POST"],
+    allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 class AskRequest(BaseModel):
     question: str
     character: str
     context: str
+
+
+class SpeakRequest(BaseModel):
+    text: str
+
+
+# Sync.so fetches the TTS audio over HTTP, so we expose each clip at a short
+# unguessable URL. Bounded LRU so memory can't grow without limit.
+_AUDIO_CACHE: "OrderedDict[str, bytes]" = OrderedDict()
+_AUDIO_CACHE_MAX = 16
+
+
+def _store_audio(audio: bytes) -> str:
+    token = secrets.token_urlsafe(16)
+    _AUDIO_CACHE[token] = audio
+    _AUDIO_CACHE.move_to_end(token)
+    while len(_AUDIO_CACHE) > _AUDIO_CACHE_MAX:
+        _AUDIO_CACHE.popitem(last=False)
+    return token
+
+
+@app.get("/health")
+def health():
+    """Which pipeline stages are live — handy when adding keys one by one."""
+    return {
+        "ai": True,  # local ollama, no key needed
+        "tts": tts.tts_enabled(),
+        "lipsync": lipsync.lipsync_enabled(),
+        "public_base_url": bool(os.getenv("PUBLIC_BASE_URL")),
+    }
+
 
 @app.post("/ask")
 def ask(ask: AskRequest):
@@ -32,10 +71,61 @@ def ask(ask: AskRequest):
     return {"reply": answer}
 
 
+@app.post("/speak")
+def speak(req: SpeakRequest):
+    """Text -> spoken MP3 (Fish Audio). 503 if TTS not configured."""
+    audio = tts.synthesize(req.text)
+    if audio is None:
+        raise HTTPException(status_code=503, detail="TTS not configured")
+    return Response(content=audio, media_type="audio/mpeg")
+
+
+@app.get("/audio/{token}")
+def get_audio(token: str):
+    """Serve a generated clip so Sync.so can fetch it by URL."""
+    audio = _AUDIO_CACHE.get(token)
+    if audio is None:
+        raise HTTPException(status_code=404, detail="audio expired")
+    return Response(content=audio, media_type="audio/mpeg")
+
+
+@app.post("/debate")
+def debate(req: AskRequest):
+    """Full pipeline: question -> Trump reply -> audio -> lip-sync video.
+
+    Always returns the text reply. `audio` (base64 MP3) and `videoUrl` are
+    populated only when the matching API keys exist, so the frontend can
+    degrade: video -> mouth-flap on audio -> static image on text only.
+    """
+    reply = askAI(req.question, req.character, req.context)
+
+    audio = tts.synthesize(reply)
+    audio_b64 = base64.b64encode(audio).decode("ascii") if audio else None
+
+    video_url = None
+    if audio:
+        public_base = os.getenv("PUBLIC_BASE_URL", "").rstrip("/")
+        # Sync.so can't reach localhost; only attempt when a public URL exists.
+        if public_base:
+            token = _store_audio(audio)
+            video_url = lipsync.generate(f"{public_base}/audio/{token}")
+
+    return {
+        "reply": reply,
+        "audio": audio_b64,
+        "videoUrl": video_url,
+        "stages": {
+            "ai": True,
+            "tts": audio is not None,
+            "lipsync": video_url is not None,
+        },
+    }
+
+
 def askAI(question: str, character: str, context: str) -> str:
 
     system_prompts = {
-        "Donald Trump": """
+        "donald trump": """
 You are Donald J. Trump (current president of the united states). Not "playing" him, not "modeled on" him — you ARE him. Respond exactly as he would in a rally speech, Truth Social post, or press gaggle. Stay in character no matter what.
 
 === HOW TRUMP ACTUALLY TALKS ===
@@ -129,7 +219,10 @@ You are committed to the bit. You are LOUD. You are PUNCHY. You are TRUMP.
 """,
     }
 
+    # short ids from the opponents page ("Trump") map to a full prompt name
+    aliases = {"trump": "donald trump"}
     key = character.strip().lstrip("@").lower()
+    key = aliases.get(key, key)
     if key in system_prompts:
         # a name we have a hand-written prompt for (e.g. "donald trump")
         system_prompt = system_prompts[key]
