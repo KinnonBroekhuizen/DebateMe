@@ -66,6 +66,7 @@ export default function Chat(){
     // ]);
     
     const [input, setInput] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
     const video = useRef<HTMLVideoElement>(null);
     const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -84,14 +85,15 @@ export default function Chat(){
     //sends new user message to the backend chatbot and awaits the response
     const sendMessage = async () => {
         if (!input.trim()) return;
-
+        const currentInput = input; // save before clearing input
         const userMsg: Message = {
             id: crypto.randomUUID(),
             role: "user",
-            text: input,
+            text: currentInput,
         };
         setMessages((prev) => [...prev, userMsg]);//adss user message to the chat messages
         setInput("");
+        setIsLoading(true); // show loading bubble
         //joins the context of the messages into a string to be sent to the AI
         const contextString = messages
             .map((m) => `${m.role}: ${m.text}`)
@@ -100,10 +102,11 @@ export default function Chat(){
         const res = await fetch("http://localhost:8000/ask", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ question: input, character: opponentName, context: contextString }),
+            body: JSON.stringify({ question: currentInput, character: opponentName, context: contextString }),
         });
         
         const answer = await res.json();
+        setIsLoading(false); // hide loading bubble
         //adds the response to the chat messages
         const aiMsg: Message = {
         id: crypto.randomUUID(),
@@ -143,6 +146,18 @@ export default function Chat(){
                                     </div>
                                 </div>
                             )
+                        )}
+                        {isLoading && (
+                            <div className="flex items-start gap-2 max-w-[80%]">
+                            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center shrink-0 text-xs font-medium text-blue-700">
+                                {opponentName}
+                            </div>
+                            <div className="bg-gray-100 rounded-tl-sm rounded-tr-xl rounded-br-xl rounded-bl-xl px-4 py-3 flex gap-1 items-center">
+                                <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:0ms]" />
+                                <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:150ms]" />
+                                <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:300ms]" />
+                            </div>
+                            </div>
                         )}
                         {/*Used for the scrolling chat */}
                         <div ref={bottomRef}/> 
