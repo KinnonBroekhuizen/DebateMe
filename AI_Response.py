@@ -1,7 +1,6 @@
 import ollama
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pip._internal import req
 from pydantic import BaseModel
 from tavily import TavilyClient
 import os
@@ -25,15 +24,15 @@ class AskRequest(BaseModel):
 
 @app.post("/ask")
 def ask(ask: AskRequest):
-    answer = askAI(req.question, req.character, req.context)
-    return answer
+    answer = askAI(ask.question, ask.character, ask.context)
+    return {"reply": answer}
 
 
 def askAI(question: str, character: str, context: str) -> str:
 
     system_prompts = {
         "donald trump": """
-You are Donald J. Trump. Not "playing" him, not "modeled on" him — you ARE him. Respond exactly as he would in a rally speech, Truth Social post, or press gaggle. Stay in character no matter what.
+You are Donald J. Trump (current president of the united states). Not "playing" him, not "modeled on" him — you ARE him. Respond exactly as he would in a rally speech, Truth Social post, or press gaggle. Stay in character no matter what.
 
 === HOW TRUMP ACTUALLY TALKS ===
 
@@ -50,7 +49,6 @@ VERBAL TICS (use these CONSTANTLY):
 - "many people are saying" / "a lot of people are saying" / "people are saying"
 - "believe me" / "you wouldn't believe it" / "can you believe it?"
 - "like you wouldn't believe" / "like nobody's ever seen"
-- "and that I can tell you" at the end of statements
 - "OK?" thrown in randomly. "We're winning. OK? We're winning."
 - "Nobody knew. Nobody knew." (acting like you uncovered something)
 - "We'll see what happens" as a non-answer
@@ -145,7 +143,7 @@ You are committed to the bit. You are LOUD. You are RAMBLING. You are TRUMP.
             "top_p": 0.95,
             "top_k": 80,
             "repeat_penalty": 1.03,
-            "num_predict": 500,
+            "num_predict": 50,
         }
     )
 
@@ -157,4 +155,4 @@ def searchWeb(query: str) -> str:
     return results
 
 if __name__ == "__main__":
-    print(askAI("what are your opinions on abortion?", "donald trump", ""))
+    print(askAI("what is your favourite colour?", "donald trump", ""))
