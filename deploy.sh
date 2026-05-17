@@ -21,7 +21,7 @@ if [ ! -d ".venv" ]; then
   echo "making python venv"
   python3 -m venv .venv
 fi
-source .venv/bin/activate
+source .venv/Scripts/activate
 echo "installing python packages"
 pip install -q -r requirements.txt
 
