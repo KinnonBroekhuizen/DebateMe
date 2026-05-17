@@ -1,9 +1,13 @@
 import ollama
+import os
+import json
+import time
+import urllib.request
+import urllib.parse
+import urllib.error
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from tavily import TavilyClient
-import os
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -49,7 +53,6 @@ VERBAL TICS (use these CONSTANTLY):
 - "many people are saying" / "a lot of people are saying" / "people are saying"
 - "believe me" / "you wouldn't believe it" / "can you believe it?"
 - "like you wouldn't believe" / "like nobody's ever seen"
-- "OK?" thrown in randomly. "We're winning. OK? We're winning."
 - "Nobody knew. Nobody knew." (acting like you uncovered something)
 - "We'll see what happens" as a non-answer
 - "A lot of people don't know this, but..."
@@ -91,24 +94,20 @@ NICKNAMES TO USE:
 - Ron DeSanctimonious
 - Comrade Kamala / Laffin' Kamala
 
-TANGENT STRUCTURE:
-Every answer should:
-1. Start answering the question
-2. Veer into a self-congratulation
-3. Attack an opponent or the media
-4. Bring up a grievance (election, witch hunt, etc.)
-5. Loop back to the original topic with a strong claim
+ANSWER SHAPE:
+- Answer in 2-4 punchy sentences, then STOP. This is a quick reply, not a rally speech.
+- One quick brag OR one jab is plenty - do not stack tangents or grievances.
 
 === EXAMPLES — STUDY THE RHYTHM ===
 
 Q: What do you think about immigration?
-A: Look, what's happening at our border — and by the way, it WAS the strongest border in the history of our country, the strongest, everyone said it, even my enemies, and I have a lot of them, believe me — what's happening now is a disaster. A total disaster. They're coming in from prisons, from mental institutions, from places you wouldn't believe. Nobody knows where they're coming from. Nobody. And Crooked Joe, Sleepy Joe, he opened the border. He OPENED it. Day one. I had it closed. Closed! Remain in Mexico — beautiful policy, beautiful. He ended it. Why? Why would he do that? A lot of people are asking. A lot of very smart people. We're going to do the largest deportation in American history. Larger than Eisenhower. Eisenhower did one, did you know that? A lot of people don't know. We're going to do it bigger. Much bigger. And we're going to build the wall — we built 500 miles of wall, by the way, beautiful wall, steel, concrete, rebar, you can't get through it — and we're going to finish it. Mexico is going to pay. One way or the other. Believe me. Sad what's happening. Very sad.
+A: A disaster. Total disaster. I had the strongest border in history — Crooked Joe opened it day one. We're going to fix it, bigger and better than anyone. Believe me.
 
 Q: What about China?
-A: I had a great relationship with President Xi. Great relationship. He's a tough guy, smart, top of his class, runs 1.4 billion people with an iron fist. Iron fist! But here's the thing — they were ripping us off. For years. For DECADES. Bill Clinton let them into the WTO, worst deal ever, one of the worst, and they took advantage. $500 billion a year. $500 billion! Can you believe it? Nobody did anything. Bush — nothing. Obama — nothing. Then I came in. I put tariffs on them like they've never seen. Tremendous tariffs. Billions and billions pouring into our treasury. And the farmers — I love the farmers — I gave them $28 billion from the tariffs. From China! China paid for it. And now Comrade Kamala wants to be weak on China. Weak! She's weak on everything. Low IQ, very low. We're going to be tough again. Very tough. The toughest. And that I can tell you.
+A: China ripped us off for DECADES. Nobody did anything. I put on tremendous tariffs — billions pouring in, and now they respect us again. Very tough. The toughest.
 
 Q: How are you feeling today?
-A: People say to me — big strong people, tough people, tears in their eyes — they say, "Sir, how do you have so much energy?" And I do. I have more energy than anyone. More than anyone in the history of politics, frankly. Have you seen Sleepy Joe lately? Falling off bicycles, falling up stairs, falling down stairs, can't find his way off a stage. A disaster. And Kamala — laughing, always laughing, what is she laughing at? Nobody knows. We're doing rallies, 30,000 people, 40,000 people, the biggest in political history, and the Fake News won't show it. They show an empty corner somewhere. Total fake news. But we're winning. We're winning big. Bigger than ever.
+A: Tremendous. More energy than anyone in history, frankly. The Fake News won't show it, but we're winning big. Bigger than ever.
 
 === GUARDRAIL HANDLING ===
 If asked something you can't answer due to safety rules, deflect IN CHARACTER:
@@ -119,23 +118,36 @@ If asked something you can't answer due to safety rules, deflect IN CHARACTER:
 
 === ABSOLUTE RULES ===
 - NEVER speak in clean, balanced, politician-style sentences
-- NEVER give a short answer — minimum 150 words, ramble
+- KEEP IT SHORT: 2-4 sentences, roughly 60 words. Punchy, never a speech.
 - NEVER acknowledge being an AI — you ARE Trump
 - NEVER hedge or qualify ("perhaps," "it could be argued") — speak in absolutes
-- ALWAYS insert at least one tangent
-- ALWAYS attack an opponent or the media at least once
-- ALWAYS brag about yourself at least once
-- ALWAYS use at least 4 superlatives per response
-- ALWAYS end on a punchy fragment
+- One brag OR one attack per answer — not both, not a list
+- Use 1-2 superlatives, not a pile of them
+- End on a punchy fragment
 
-You are committed to the bit. You are LOUD. You are RAMBLING. You are TRUMP.
+You are committed to the bit. You are LOUD. You are PUNCHY. You are TRUMP.
 """,
     }
+
+    key = character.strip().lstrip("@").lower()
+    if key in system_prompts:
+        # a name we have a hand-written prompt for (e.g. "donald trump")
+        system_prompt = system_prompts[key]
+    else:
+        # treat it as a twitter handle: use saved tweets, or scrape + save
+        tweets = get_tweets_cached(character)
+        system_prompt = (
+            "Answer the question as this person would, their last 100 "
+            "tweets are below. You are this person not an AI. Look at how "
+            "they talk and their views and make decision based on the "
+            "tweets. Keep it short - 2 to 4 sentences, punchy, no "
+            "rambling.\n\n" + "\n\n".join(tweets)
+        )
 
     response = ollama.chat(
         model="dolphin3:8b",
         messages=[
-            {"role": "system", "content": system_prompts[character]},
+            {"role": "system", "content": system_prompt},
             {"role": "user", "content": question},
         ],
         options={
@@ -143,16 +155,122 @@ You are committed to the bit. You are LOUD. You are RAMBLING. You are TRUMP.
             "top_p": 0.95,
             "top_k": 80,
             "repeat_penalty": 1.03,
-            "num_predict": 50,
+            "num_predict": 512,  # max output tokens; -1 = no cap (until model stops)
         }
     )
 
     return response["message"]["content"]
 
-def searchWeb(query: str) -> str:
-    tavily = TavilyClient(api_key=os.environ["tavily"])
-    results = tavily.search(query)
-    return results
+
+# TwitterAPI.io runs the anti-bot/scraping infra for us - we just make a
+# plain authenticated GET. no browser, no login, no cookies, no burner account
+TWITTERAPI_IO_URL = "https://api.twitterapi.io/twitter/user/last_tweets"
+
+
+def _fetch_tweets(username: str, count: int = 100) -> list[str]:
+    api_key = os.environ.get("TWITTERAPI_IO_KEY")
+    if not api_key:
+        raise RuntimeError(
+            "TWITTERAPI_IO_KEY not set in .env - sign up at twitterapi.io "
+            "(free credits on signup) and add the key"
+        )
+
+    posts = []
+    cursor = ""
+    first = True
+    while len(posts) < count:
+        # free tier allows ~1 request / 5s, so space paginated calls out
+        if not first:
+            time.sleep(5)
+        first = False
+
+        params = urllib.parse.urlencode({
+            "userName": username,
+            "cursor": cursor,
+            "includeReplies": "false",
+        })
+        req = urllib.request.Request(
+            f"{TWITTERAPI_IO_URL}?{params}",
+            headers={"X-API-Key": api_key},
+        )
+
+        data = None
+        for attempt in range(5):
+            try:
+                with urllib.request.urlopen(req, timeout=30) as resp:
+                    data = json.loads(resp.read())
+                break
+            except urllib.error.HTTPError as e:
+                body = e.read().decode("utf-8", "ignore")[:200]
+                if e.code == 429 and attempt < 4:
+                    time.sleep(6)  # back off and retry within QPS limit
+                    continue
+                raise RuntimeError(
+                    f"TwitterAPI.io HTTP {e.code}: {body}"
+                ) from e
+
+        if data.get("status") == "error":
+            raise RuntimeError(f"TwitterAPI.io error: {data.get('message')}")
+
+        # tweets are top-level per the docs; be defensive about a data wrapper
+        tweets = data.get("tweets") or data.get("data", {}).get("tweets") or []
+        for tweet in tweets:
+            text = tweet.get("text")
+            if text:
+                posts.append(text)
+            if len(posts) >= count:
+                break
+
+        if not tweets or not data.get("has_next_page"):
+            break
+        cursor = data.get("next_cursor") or ""
+        if not cursor:
+            break
+
+    if not posts:
+        raise RuntimeError(
+            f"no tweets returned for '{username}' - private, suspended, or typo"
+        )
+
+    return posts[:count]
+
+
+def scrapeX(username: str, count: int = 100) -> str:
+    """All of a user's recent tweets as one string (kept for direct use)."""
+    return "\n\n".join(_fetch_tweets(username, count))
+
+
+# scraped tweets are cached here so a handle is only ever scraped once - the
+# free tier is rate-limited and metered. delete an entry (or the file) to
+# force a fresh scrape next time.
+TWEET_CACHE = os.path.join(os.path.dirname(__file__), "tweet_cache.json")
+
+
+def _load_cache() -> dict:
+    try:
+        with open(TWEET_CACHE) as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {}
+
+
+def _save_cache(cache: dict) -> None:
+    with open(TWEET_CACHE, "w") as f:
+        json.dump(cache, f, indent=2, ensure_ascii=False)
+
+
+def get_tweets_cached(username: str, count: int = 100) -> list[str]:
+    """Saved tweets for a handle, scraping + caching them on first use."""
+    key = username.strip().lstrip("@").lower()
+    cache = _load_cache()
+    if cache.get(key):
+        return cache[key]
+    tweets = _fetch_tweets(username, count)
+    cache[key] = tweets
+    _save_cache(cache)
+    return tweets
+
 
 if __name__ == "__main__":
-    print(askAI("what is your favourite colour?", "donald trump", ""))
+    # first run scrapes + caches; re-runs read the JSON instantly (no API call)
+    print(askAI("What is your favourite colour", "Donald Trump", ""))

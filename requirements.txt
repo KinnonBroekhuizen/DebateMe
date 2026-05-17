@@ -2,6 +2,5 @@
 fastapi
 uvicorn[standard]
 ollama
-tavily-python
 python-dotenv
 pydantic
