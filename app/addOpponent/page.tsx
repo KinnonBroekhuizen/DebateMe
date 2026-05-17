@@ -1,7 +1,6 @@
 "use client";
 import { useRef, useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-
 export default function addOpponent(){
     const [nameInput, setNameInput] = useState("");
     const [videoInput, setVideoInput] = useState("");
