@@ -16,17 +16,15 @@ cleanup() {
 }
 trap cleanup EXIT INT TERM
 
-# set up python venv
-if [ ! -d ".venv" ]; then
-  echo "making python venv"
-  python3 -m venv .venv
+# set up python venv — kept OUTSIDE the project dir on purpose. This Desktop
+# is synced to iCloud; a .venv in it makes pip crawl (iCloud tries to sync
+# every one of ~5k files as pip writes them). ~/.venvs is not synced.
+VENV_DIR="$HOME/.venvs/smoke-mirrors"
+if [ ! -d "$VENV_DIR" ]; then
+  echo "making python venv at $VENV_DIR"
+  python3 -m venv "$VENV_DIR"
 fi
-# venv layout differs: bin/ on macOS+Linux, Scripts/ on Windows
-if [ -f .venv/bin/activate ]; then
-  source .venv/bin/activate
-else
-  source .venv/Scripts/activate
-fi
+source "$VENV_DIR/bin/activate"
 echo "installing python packages"
 pip install -q -r requirements.txt
 
