@@ -2,9 +2,9 @@
 
 `generate(audio_url)` drives a base talking-head video with the supplied
 audio and returns the finished video URL, or ``None`` when lip-sync is not
-configured / fails. Sync.so fetches the audio from a public URL, so the
-caller must pass a URL their servers can actually reach (a deployed/tunnelled
-backend, not localhost) — see PUBLIC_BASE_URL handling in AI_Response.py.
+configured / fails. Sync.so fetches the audio from a public URL — the caller
+hosts the clip on Cloudinary first (see cloudinary_upload.py) and passes that
+secure URL here.
 
 The API key is read ONLY from the SYNC_API_KEY environment variable. The key
 that was hardcoded in the old branch `quickstart.py` files must be rotated.

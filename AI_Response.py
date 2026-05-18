@@ -3,11 +3,9 @@ import os
 import json
 import time
 import base64
-import secrets
 import urllib.request
 import urllib.parse
 import urllib.error
-from collections import OrderedDict
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import Response
 from fastapi.middleware.cors import CORSMiddleware
@@ -16,6 +14,7 @@ from dotenv import load_dotenv
 
 import tts
 import lipsync
+import cloudinary_upload
 
 load_dotenv()
 
@@ -39,29 +38,14 @@ class SpeakRequest(BaseModel):
     text: str
 
 
-# Sync.so fetches the TTS audio over HTTP, so we expose each clip at a short
-# unguessable URL. Bounded LRU so memory can't grow without limit.
-_AUDIO_CACHE: "OrderedDict[str, bytes]" = OrderedDict()
-_AUDIO_CACHE_MAX = 16
-
-
-def _store_audio(audio: bytes) -> str:
-    token = secrets.token_urlsafe(16)
-    _AUDIO_CACHE[token] = audio
-    _AUDIO_CACHE.move_to_end(token)
-    while len(_AUDIO_CACHE) > _AUDIO_CACHE_MAX:
-        _AUDIO_CACHE.popitem(last=False)
-    return token
-
-
 @app.get("/health")
 def health():
     """Which pipeline stages are live — handy when adding keys one by one."""
     return {
         "ai": True,  # local ollama, no key needed
         "tts": tts.tts_enabled(),
+        "cloudinary": cloudinary_upload.cloudinary_enabled(),
         "lipsync": lipsync.lipsync_enabled(),
-        "public_base_url": bool(os.getenv("PUBLIC_BASE_URL")),
     }
 
 
@@ -80,15 +64,6 @@ def speak(req: SpeakRequest):
     return Response(content=audio, media_type="audio/mpeg")
 
 
-@app.get("/audio/{token}")
-def get_audio(token: str):
-    """Serve a generated clip so Sync.so can fetch it by URL."""
-    audio = _AUDIO_CACHE.get(token)
-    if audio is None:
-        raise HTTPException(status_code=404, detail="audio expired")
-    return Response(content=audio, media_type="audio/mpeg")
-
-
 @app.post("/debate")
 def debate(req: AskRequest):
     """Full pipeline: question -> Trump reply -> audio -> lip-sync video.
@@ -104,11 +79,10 @@ def debate(req: AskRequest):
 
     video_url = None
     if audio:
-        public_base = os.getenv("PUBLIC_BASE_URL", "").rstrip("/")
-        # Sync.so can't reach localhost; only attempt when a public URL exists.
-        if public_base:
-            token = _store_audio(audio)
-            video_url = lipsync.generate(f"{public_base}/audio/{token}")
+        # Sync.so fetches the audio by URL, so host it on Cloudinary first.
+        # No Cloudinary keys → no public URL → no video (mouth-flap fallback).
+        audio_url = cloudinary_upload.upload_audio(audio)
+        video_url = lipsync.generate(audio_url)
 
     return {
         "reply": reply,
