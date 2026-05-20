@@ -1,52 +1,74 @@
-# quickstart.py
 import time
+import requests
 from sync import Sync
 from sync.common import Audio, GenerationOptions, Video
 from sync.core.api_error import ApiError
+from dotenv import load_dotenv
+import os
+import cloudinary
+import cloudinary.uploader
 
-api_key = "sk-MH0yUvb4TD-inNrKrdRRyg.wKYDDjoktublGYvL637W8gwPH6v44dMm" 
+load_dotenv()  # ← must be first before any os.getenv calls
 
-# URL to the source video
-video_url = "https://assets.sync.so/docs/example-video.mp4"
-# URL to the audio file, we can replace this with the audio file that big coop sends my way
-audio_url = "https://assets.sync.so/docs/example-audio.wav"
+cloudinary.config(
+    cloud_name = os.getenv("CLOUDINARY_CLOUD_NAME"),
+    api_key    = os.getenv("CLOUDINARY_API_KEY"),
+    api_secret = os.getenv("CLOUDINARY_API_SECRET")
+)
 
-# Sends this info from the client side
-client = Sync(
-    base_url="https://api.sync.so", 
-    api_key=api_key
-).generations
+SYNC_API_KEY = os.getenv("SYNC_API_KEY")
+TRUMP_VIDEO_URL = "https://res.cloudinary.com/dozzqm6mu/video/upload/v1778465952/TrumpTalking_qsdio1.mp4"
+SPEECH_TEXT = "Hey user, welcome to the Debate Me project!"
 
-# Visual indicator in terminal that it has started the job
-print("Starting lip sync generation job...")
+def generate_video(text: str) -> str:
 
-# Creates the video
-try:
-    response = client.create(
-        input=[Video(url=video_url),Audio(url=audio_url)],
-        model="lipsync-2",
-        options=GenerationOptions(sync_mode="cut_off"),
-        output_file_name="quickstart"
+    # Step 1 — Get raw audio bytes from TTS server
+    print("Getting audio from TTS server...")
+    tts_response = requests.post(
+        "http://localhost:8000/speak",
+        headers={"Content-Type": "application/json"},
+        json={"text": text}
     )
-except ApiError as e:
-    print(f'create generation request failed with status code {e.status_code} and error {e.body}')
-    exit()
 
-job_id = response.id
-print(f"Generation submitted successfully, job id: {job_id}")
+    # Step 2 — Upload raw bytes to Cloudinary
+    print("Uploading audio to Cloudinary...")
+    upload = cloudinary.uploader.upload(
+        tts_response.content,
+        resource_type="raw",
+        format="wav"
+    )
+    audio_url = upload["secure_url"]
+    print(f"Audio URL: {audio_url}")
 
-generation = client.get(job_id)
-status = generation.status
+    # Step 3 — Send to Sync.so
+    client = Sync(
+        base_url="https://api.sync.so",
+        api_key=SYNC_API_KEY
+    ).generations
 
-# Quick timer to show that it is working, onc edone displayed
-while status not in ['COMPLETED', 'FAILED']:
-    print('polling status for generation', job_id)
-    time.sleep(10)
-    generation = client.get(job_id)
-    status = generation.status
+    print("Starting lip sync generation...")
+    try:
+        response = client.create(
+            input=[Video(url=TRUMP_VIDEO_URL), Audio(url=audio_url)],
+            model="lipsync-2",
+            options=GenerationOptions(sync_mode="loop"),
+        )
+    except ApiError as e:
+        raise Exception(f"Sync.so failed: {e.status_code} - {e.body}")
 
-# Exception catching
-if status == 'COMPLETED':
-    print('generation', job_id, 'completed successfully, output url:', generation.output_url)
-else:
-    print('generation', job_id, 'failed')
+    # Step 4 — Poll until done
+    job = client.get(response.id)
+    while job.status not in ["COMPLETED", "FAILED"]:
+        print(f"Polling... {job.status}")
+        time.sleep(10)
+        job = client.get(response.id)
+
+    if job.status == "FAILED":
+        raise Exception("Sync.so generation failed")
+
+    print(f"Done! Video URL: {job.output_url}")
+    return job.output_url
+
+if __name__ == "__main__":
+    video_url = generate_video(SPEECH_TEXT)
+    print(f"\nFinal video: {video_url}")
