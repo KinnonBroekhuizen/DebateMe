@@ -2,7 +2,9 @@
 import { useRef, useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useParams } from 'next/navigation';
+import { useSpeechInput } from "./useSpeechInput";
 import TrumpStage from '@/app/components/trump-stage/TrumpStage';
+import { Mic, MicOff } from 'react-feather';
 
 //message object, belongs to either an ooponent or the user
 type Message = {
@@ -24,7 +26,7 @@ export default function Chat(){
 
     const { id } = useParams();//gets the opponent ID from the page
     const resolvedId = Array.isArray(id) ? id[0] : id;//first page param as the ID
-
+    const { text:input, setText:setInput, isListening, toggleListening } = useSpeechInput();
     const [opponentName, setOpponentName] = useState<string>("");//gets opponent name from the database and ID
     //fethces opponent information and starting layout from the database
     useEffect(() => {
@@ -41,7 +43,7 @@ export default function Chat(){
     }, [resolvedId]);
 
     const [messages, setMessages] = useState<Message[]>([]);
-    const [input, setInput] = useState("");
+    //const [input, setInput] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     // latest media from the pipeline — fed to the Trump stage on the right
     const [videoUrl, setVideoUrl] = useState<string | null>(null);
@@ -105,6 +107,7 @@ export default function Chat(){
             setIsLoading(false); // hide loading bubble
         }
     };
+    
 
     return(
         <main>
@@ -161,6 +164,14 @@ export default function Chat(){
                                 onChange={(e) => setInput(e.target.value)}
                                 onKeyDown={(e) => e.key === "Enter" && sendMessage()}
                             />
+                           <button
+                                onClick={toggleListening}
+                                title={isListening ? "Stop listening" : "Start listening"}
+                                className="text-xl px-2"
+                                style={{ background: "none", border: "none", cursor: "pointer", color: isListening ? "red" : "gray" }}
+                            >
+                                {isListening ? <MicOff size={20} /> : <Mic size={20} />}
+                            </button>
                             {/*sends message to the backend and adds it to the chat */}
                             <button
                                 onClick={sendMessage}

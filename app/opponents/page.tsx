@@ -4,7 +4,7 @@ const opponents = [
   {
     id: "Luxon",
     name: "Christopher Luxon",
-    description: "NZ's Minister and Leader of the National Party",
+    description: "NZ's Prime Minister and Leader of the National Party",
     image:
       "https://cdn.britannica.com/80/269080-050-C6EA1EB3/New-Zealand-Prime-Minister-Christopher-Luxon.jpg",
   },
@@ -14,6 +14,13 @@ const opponents = [
     description: "45th & 47th President of the USA. Republican",
     image:
       "https://www.whitehouse.gov/wp-content/uploads/2025/01/Donald-J-Trump.jpg",
+  },
+  {
+    id: "Hipkins",
+    name: "Christopher Hipkins",
+    description: "Leader of the Labour Party",
+    image:
+      "https://encrypted-tbn1.gstatic.com/licensed-image?q=tbn:ANd9GcQStid5x7f9DB1XLn6ns-9bGDNPmMefuqpkizlAPio1W24lordheBGlrVq1grYAGjEiOeF_DodSScT5HCw",
   },
   {
     id: "Seymour",

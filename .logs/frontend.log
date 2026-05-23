@@ -6,14 +6,11 @@
 - Local:         http://localhost:3000
 - Network:       http://10.5.0.2:3000
 - Environments: .env.local
-✓ Ready in 1204ms
+✓ Ready in 1001ms
 
- GET / 200 in 1013ms (next.js: 553ms, application-code: 459ms)
- GET /opponents 200 in 125ms (next.js: 59ms, application-code: 66ms)
- GET /chat/Trump 200 in 1770ms (next.js: 1703ms, application-code: 67ms)
- GET /api/video-stream 404 in 137ms (next.js: 70ms, application-code: 67ms)
- GET / 200 in 62ms (next.js: 15ms, application-code: 47ms)
- GET /opponents 200 in 72ms (next.js: 10ms, application-code: 62ms)
- GET /chat/Trump 200 in 75ms (next.js: 29ms, application-code: 46ms)
- GET /api/video-stream 404 in 93ms (next.js: 15ms, application-code: 77ms)
+ GET / 200 in 1162ms (next.js: 441ms, application-code: 721ms)
+ GET / 200 in 606ms (next.js: 26ms, application-code: 579ms)
+ GET /chat/Trump 200 in 5.0s (next.js: 1678ms, application-code: 3.3s)
+ GET /opponents 200 in 2.2s (next.js: 1487ms, application-code: 751ms)
+ GET /chat/Trump 200 in 256ms (next.js: 74ms, application-code: 183ms)
 [?25h
