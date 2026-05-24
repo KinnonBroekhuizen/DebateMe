@@ -2,44 +2,6 @@
 import Link from "next/link";
 import { supabase } from '@/lib/supabase';
 import {useEffect, useState} from 'react';
-// const opponents = [
-//   {
-//     id: "Luxon",
-//     name: "Christopher Luxon",
-//     description: "NZ's Prime Minister and Leader of the National Party",
-//     image:
-//       "https://cdn.britannica.com/80/269080-050-C6EA1EB3/New-Zealand-Prime-Minister-Christopher-Luxon.jpg",
-//   },
-//   {
-//     id: "Trump",
-//     name: "Donald Trump",
-//     description: "45th & 47th President of the USA. Republican",
-//     image:
-//       "https://www.whitehouse.gov/wp-content/uploads/2025/01/Donald-J-Trump.jpg",
-//   },
-//   {
-//     id: "Hipkins",
-//     name: "Christopher Hipkins",
-//     description: "Leader of the Labour Party",
-//     image:
-//       "https://encrypted-tbn1.gstatic.com/licensed-image?q=tbn:ANd9GcQStid5x7f9DB1XLn6ns-9bGDNPmMefuqpkizlAPio1W24lordheBGlrVq1grYAGjEiOeF_DodSScT5HCw",
-//   },
-//   {
-//     id: "Seymour",
-//     name: "David Seymour",
-//     description: "Leader of the ACT party",
-//     image:
-//       "https://www.beehive.govt.nz/sites/default/files/styles/portrait_image/public/2025-05/headshot_David-Seymour_2.jpg?itok=59JJMpZ7",
-//   },
-//   {
-//     id: "Peters",
-//     name: "Winston Peters",
-//     description: "Leader of NZ First",
-//     image:
-//       "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdk4-gf-aokhWIS5JOox9reyi_N2b_BTPUyw&s",
-//   },
-// ];
-
 
 export default function OpponentsPage() {
   type Opponent = {
