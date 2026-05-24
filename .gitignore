@@ -24,6 +24,7 @@
 /.venv
 /.logs
 tweet_cache.json
+web_cache.json
 __pycache__/
 *.pyc
 
