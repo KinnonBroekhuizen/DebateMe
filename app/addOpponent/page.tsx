@@ -5,6 +5,29 @@ export default function addOpponent(){
     const [nameInput, setNameInput] = useState("");
     const [videoInput, setVideoInput] = useState("");
     const [photoInput, setPhotoInput] = useState("");
+    const [descriptionInput, setDescriptionInput] = useState("");
+    const handleClick = async () =>{
+        const nameArray = nameInput.split(' ');
+        const idToAdd = nameArray[nameArray.length -1];
+        const { error } = await supabase
+        .from("ChatIdentifiers")
+        .insert({
+        id: idToAdd,
+        opponent_name: nameInput,
+        Information: descriptionInput,
+        image_link: photoInput,
+        });
+
+    if (error) {
+        alert("Error inserting opponent: " + error.message);
+    } else {
+        alert("Opponent added successfully!");
+        setNameInput("");
+        setDescriptionInput("");
+        setPhotoInput("");
+        setVideoInput("");
+    }
+    }
     return(
         <main>
             <div className='h-sreen-200'>
@@ -17,7 +40,7 @@ export default function addOpponent(){
                     </p>
                 </div>
                 <div className='flex'>
-                    <p className='px-3 py-2'>Opponent Name:</p>
+                    <p className='w-56 shrink-0 px-3 py-2'>Opponent Name:</p>
                     <input
                     className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-400"
                     placeholder="Type here"
@@ -26,7 +49,16 @@ export default function addOpponent(){
                     />
                 </div>
                 <div className='flex'>
-                    <p className='px-3 py-2'>Opponent Video:</p>
+                    <p className='w-56 shrink-0 px-3 py-2'>Opponent Description/Role:</p>
+                    <input
+                    className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-400"
+                    placeholder="Type here"
+                    value={descriptionInput}
+                    onChange={(e) => setDescriptionInput(e.target.value)}
+                    />
+                </div>
+                <div className='flex'>
+                    <p className='w-56 shrink-0 px-3 py-2'>Opponent Video:</p>
                     <input
                     className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-400"
                     placeholder="Type here"
@@ -35,7 +67,7 @@ export default function addOpponent(){
                     />
                 </div>
                 <div className='flex'>
-                    <p className='px-3 py-2'>Opponent Photo:</p>
+                    <p className='w-56 shrink-0 px-3 py-2'>Opponent Photo Link:</p>
                     <input
                     className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-400"
                     placeholder="Type here"
@@ -43,7 +75,9 @@ export default function addOpponent(){
                     onChange={(e) => setPhotoInput(e.target.value)}
                     />
                 </div>
-                
+                <button className="bg-gray-300 hover:bg-gray-400 hover:cursor-pointer text-gray-700 font-semibold px-6 py-3 rounded-md transition-colors" onClick={handleClick}>
+                    Add Opponent
+                </button>
             </div>
         </main>
     )
