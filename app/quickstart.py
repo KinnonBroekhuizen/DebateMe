@@ -18,7 +18,9 @@ cloudinary.config(
 
 SYNC_API_KEY = os.getenv("SYNC_API_KEY")
 TRUMP_VIDEO_URL = "https://res.cloudinary.com/dozzqm6mu/video/upload/v1778465952/TrumpTalking_qsdio1.mp4"
-SPEECH_TEXT = "Hey user, welcome to the Debate Me project!"
+LUXON_VIDEO_URL = "https://res.cloudinary.com/dozzqm6mu/video/upload/v1779665623/LuxonTalking_rg6v0w.mp4"
+HIPKINS_VIDEO_URL = "https://res.cloudinary.com/dozzqm6mu/video/upload/v1779667961/HipkinsTalking_q0339k.mp4"
+SPEECH_TEXT = "Debate Me Project"
 
 def generate_video(text: str) -> str:
 
