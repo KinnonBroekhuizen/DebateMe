@@ -8,13 +8,49 @@ export default function AddOpponent() {
   const [videoInput, setVideoInput] = useState("");
   const [photoInput, setPhotoInput] = useState("");
   const [infoInput, setInfoInput] = useState("");
+  const [titleInput, setTitleInput] = useState("");
+  
+  const handleClick = async () =>{
+    if (!nameInput.trim() || !infoInput.trim() || !photoInput.trim() || !titleInput.trim()) {
+      alert("Please fill in all fields.");
+      return;
+    }
+    const nameArray = nameInput.split(' ');
+    const idToAdd = nameArray[nameArray.length -1];
+    const { error } = await supabase
+    .from("ChatIdentifiers")
+    .insert({
+    id: idToAdd,
+    opponent_name: nameInput,
+    Information: infoInput,
+    image_link: photoInput,
+    title: titleInput
+    });
 
+    if (error) {
+        alert("Error inserting opponent: " + error.message);
+    } else {
+        alert("Opponent added successfully!");
+        setNameInput("");
+        setInfoInput("");
+        setPhotoInput("");
+        setVideoInput("");
+        setTitleInput("");
+    }
+    }
   const fields = [
     {
       label: "Opponent Name",
       placeholder: "e.g. John Key",
       value: nameInput,
       onChange: setNameInput,
+      icon: <User color="var(--text)" size={30} />,
+    },
+    {
+      label: "Opponent Title",
+      placeholder: "e.g. Ex-Prime Minister with National",
+      value: titleInput,
+      onChange: setTitleInput,
       icon: <User color="var(--text)" size={30} />,
     },
     {
@@ -93,6 +129,7 @@ export default function AddOpponent() {
                 setVideoInput("");
                 setPhotoInput("");
                 setInfoInput("");
+                setTitleInput("");
               }}
             >
               Clear all
@@ -100,6 +137,7 @@ export default function AddOpponent() {
             <button
               type="button"
               className="bg-[var(--accent)] hover:bg-accent/90 text-[var(--text)] cursor-pointer text-sm font-semibold px-6 py-2.5 rounded-lg transition-opacity hover:opacity-90"
+              onClick={handleClick}
             >
               Add Opponent
             </button>

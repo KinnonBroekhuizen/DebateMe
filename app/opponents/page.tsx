@@ -16,7 +16,7 @@ export default function OpponentsPage() {
     const fetchOpponents = async () => {
       const { data, error } = await supabase
         .from("ChatIdentifiers")
-        .select("id, opponent_name, Information, image_link");
+        .select("id, opponent_name, title, image_link");
 
       if (error) {
         console.error("Error fetching opponents:", error);
@@ -27,7 +27,7 @@ export default function OpponentsPage() {
       const mapped = data.map((row) => ({
         id: row.id,
         name: row.opponent_name,
-        description: row.Information,
+        description: row.title,
         image: row.image_link,
       }));
 
