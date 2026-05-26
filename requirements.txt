@@ -1,7 +1,12 @@
-# Backend (FastAPI) dependencies for AI_Response.py
+# Backend (FastAPI) dependencies for AI_Response.py + the debate pipeline
 fastapi
 uvicorn[standard]
 ollama
-tavily-python
 python-dotenv
 pydantic
+# text-to-speech (tts.py) — Cooper / Bridge branch code
+fish-audio-sdk
+# audio hosting for Sync.so (cloudinary_upload.py) — Bridge branch quickstart code
+cloudinary
+# lip-sync video (lipsync.py) — Bridge branch quickstart code
+syncsdk

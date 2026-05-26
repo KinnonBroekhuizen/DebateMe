@@ -2,59 +2,56 @@ import { Clock, HelpCircle, FileText } from "react-feather";
 import Link from "next/link";
 export default function Home() {
   return (
-    <div className="min-h-screen bg-white font-sans">
+    <div className="min-h-screen font-sans">
       {/* Hero Section */}
-      <main className="px-10 pt-16 pb-12 max-w-5xl flex justify-evenly">
+      <main className="px-10 pt-16 pb-12">
         {/* Left Side */}
         <div className="">
-          <h2 className="text-6xl font-extrabold text-black leading-tight mb-6 animate-fade-down animate-once animate-ease-out">
+          <h2 className="text-6xl font-extrabold text-[var(--text)] leading-tight mb-6 animate-fade-down animate-once animate-ease-out">
             Debate with political people <br /> who shape nations.
           </h2>
-          <p className="text-xl text-gray-700 mb-16 max-w-xl leading-relaxed animate-fade-down animate-once animate-ease-out animate-delay-500">
+          <p className="text-2xl text-[var(--muted)] mb-16 max-w-xl leading-relaxed animate-fade-down animate-once animate-ease-out animate-delay-500">
             Challenge Christopher Luxon and other political leaders on the
             issues that define our generations. This is where real debate
             happens.
           </p>
 
           {/* Buttons */}
-          <div className="flex justify-end gap-4">
+          <div className="flex items-stretch gap-4 justify-center mx-auto">
             <Link
               href="/opponents"
-              className="font-semibold px-6 py-3 rounded-md transition-opacity hover:opacity-90"
-              style={{
-                background: "var(--primary)",
-                color: "black",
-              }}
+              className="p-5 flex flex-col gap-2 justify-between rounded-md transition-opacity hover:opacity-90 max-w-120 bg-[var(--accent)]"
             >
-              Start Debating
+              <span className="font-bold text-2xl">Start Debating</span>
+              <p className="text-lg  leading-snug opacity-80">
+                Go head-to-head with a political leader. Pick your opponent,
+                choose a topic, and make your case in real time.
+              </p>
             </Link>
-            <button className="bg-gray-300 hover:bg-gray-400 text-gray-700 font-semibold px-6 py-3 rounded-md transition-colors">
-              View On Github
-            </button>
+
             <Link
               href="/addOpponent"
-              className="font-semibold px-6 py-3 rounded-md transition-opacity hover:opacity-90"
-              style={{
-                background: "var(--primary)",
-                color: "black",
-              }}
+              className="p-5 flex flex-col gap-2 justify-between rounded-md transition-opacity hover:opacity-90 max-w-90 bg-[var(--muted-accent)]"
             >
-              Add Opponent
+              <span className="font-bold text-2xl">Add Opponent</span>
+              <p className="text-lg leading-snug opacity-80">
+                Know a leader missing from the list? Submit them and bring them
+                into the arena.
+              </p>
             </Link>
           </div>
         </div>
-
       </main>
 
       {/* Features Section */}
       <section className="px-10 pt-16 pb-24">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-45 max-w-9xl mx-auto bg-[var(--primary)] p-10 rounded-md">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-45 max-w-9xl mx-auto bg-[var(--surface)] p-10 rounded-md">
           {/* Feature 1 */}
           <div className="flex flex-col items-center text-center gap-6">
             <div className="rounded-md p-4 w-50 h-40 flex items-center justify-center">
-              <Clock color="black" size={120} />
+              <Clock color="var(--text)" size={120} />
             </div>
-            <p className="text-2xl font-semibold text-black leading-snug">
+            <p className="text-2xl font-semibold text-[var(--text)] leading-snug">
               Challenge Christopher Luxon and other political leaders in real
               time.
             </p>
@@ -63,9 +60,9 @@ export default function Home() {
           {/* Feature 2 */}
           <div className="flex flex-col items-center text-center gap-6">
             <div className="p-4 w-50 h-40 flex items-center justify-center">
-              <HelpCircle color="black" size={120} />
+              <HelpCircle color="var(--text)" size={120} />
             </div>
-            <p className="text-2xl font-semibold text-black leading-snug">
+            <p className="text-2xl font-semibold text-[var(--text)] leading-snug">
               Your questions shape the conversation and hold leaders
               accountable.
             </p>
@@ -74,9 +71,9 @@ export default function Home() {
           {/* Feature 3 */}
           <div className="flex flex-col items-center text-center gap-6">
             <div className="rounded-md p-4 w-50 h-40 flex items-center justify-center">
-              <FileText color="black" size={120} />
+              <FileText color="var(--text)" size={120} />
             </div>
-            <p className="text-2xl font-semibold text-black leading-snug">
+            <p className="text-2xl font-semibold text-[var(--text)] leading-snug">
               Watch unscripted exchanges where ideas collide and truth emerges.
             </p>
           </div>

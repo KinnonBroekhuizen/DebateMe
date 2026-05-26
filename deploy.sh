@@ -16,12 +16,15 @@ cleanup() {
 }
 trap cleanup EXIT INT TERM
 
-# set up python venv
-if [ ! -d ".venv" ]; then
-  echo "making python venv"
-  python3 -m venv .venv
+# set up python venv — kept OUTSIDE the project dir on purpose. This Desktop
+# is synced to iCloud; a .venv in it makes pip crawl (iCloud tries to sync
+# every one of ~5k files as pip writes them). ~/.venvs is not synced.
+VENV_DIR="$HOME/.venvs/smoke-mirrors"
+if [ ! -d "$VENV_DIR" ]; then
+  echo "making python venv at $VENV_DIR"
+  python3 -m venv "$VENV_DIR"
 fi
-source .venv/Scripts/activate
+source "$VENV_DIR/bin/activate"
 echo "installing python packages"
 pip install -q -r requirements.txt
 
@@ -37,12 +40,13 @@ if [ ! -d "node_modules" ]; then
   npm install
 fi
 
-# warn if env keys missing but dont stop
-if [ ! -f .env ] || ! grep -q "^tavily=" .env; then
-  echo "warning: tavily key not found in .env"
-fi
-if ! grep -q "NEXT_PUBLIC_SUPABASE_URL" .env 2>/dev/null; then
-  echo "warning: supabase keys not in .env"
+# warn if env keys missing but dont stop (pipeline degrades gracefully)
+if [ ! -f .env ]; then
+  echo "warning: no .env (copy .env.example) - text-only, no audio/video"
+else
+  grep -q "^FISH_API_KEY=." .env || echo "warning: FISH_API_KEY missing - no TTS audio"
+  grep -q "^SYNC_API_KEY=." .env || echo "warning: SYNC_API_KEY missing - no lip-sync video"
+  grep -q "NEXT_PUBLIC_SUPABASE_URL=." .env || echo "warning: supabase keys not in .env"
 fi
 
 # start the backend
