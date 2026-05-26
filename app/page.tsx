@@ -1,4 +1,10 @@
-import { Clock, HelpCircle, FileText } from "react-feather";
+import {
+  Clock,
+  HelpCircle,
+  FileText,
+  MessageSquare,
+  UserPlus,
+} from "react-feather";
 import Link from "next/link";
 export default function Home() {
   return (
@@ -10,36 +16,40 @@ export default function Home() {
           <h2 className="text-6xl font-extrabold text-[var(--text)] leading-tight mb-6 animate-fade-down animate-once animate-ease-out">
             Debate with political people <br /> who shape nations.
           </h2>
-          <p className="text-2xl text-[var(--muted)] mb-16 max-w-xl leading-relaxed animate-fade-down animate-once animate-ease-out animate-delay-500">
+          <p className="text-2xl text-[var(--muted)] mb-16 max-w-xl leading-8 animate-fade-down animate-once animate-ease-out animate-delay-500">
             Challenge Christopher Luxon and other political leaders on the
             issues that define our generations. This is where real debate
             happens.
           </p>
 
           {/* Buttons */}
-          <div className="flex items-stretch gap-4 justify-center mx-auto">
+          <div className="justify-end flex gap-4">
             <Link
               href="/opponents"
-              className="p-5 flex flex-col gap-1 rounded-md transition-opacity hover:opacity-90 max-w-120 bg-[var(--accent)]"
+              className="p-7 flex justify-between flex-row items-center gap-5 rounded-md transition-opacity hover:opacity-90 max-w-120 max-h-25 bg-[var(--accent)]"
             >
-              <span className="font-bold text-2xl underline">
-                Start Debating
-              </span>
-              <p className="text-lg  leading-snug opacity-80">
-                Go head-to-head with a political leader. Pick your opponent and
-                make your case in real time.
-              </p>
+              <MessageSquare size={100} />
+              <div>
+                <span className="font-bold text-xl pb-10">Start Debating</span>
+                <p className="text-md leading-snug opacity-80">
+                  Go head-to-head with a political leader. Pick your opponent
+                  and make your case in real time.
+                </p>
+              </div>
             </Link>
 
             <Link
               href="/addOpponent"
-              className="p-5 flex flex-col gap-1 rounded-md transition-opacity hover:opacity-90 max-w-90 bg-[var(--muted-accent)]"
+              className="p-7 flex justify-between flex-row items-center gap-5 rounded-md transition-opacity hover:opacity-90 max-w-120 max-h-25 bg-[var(--muted-accent)]"
             >
-              <span className="font-bold text-2xl">Add Opponent</span>
-              <p className="text-lg leading-snug opacity-80">
-                Know a leader missing from the list? Submit them and bring them
-                into the arena.
-              </p>
+              <UserPlus size={100} />
+              <div>
+                <span className="font-bold text-xl">Add Opponent</span>
+                <p className="text-md leading-snug opacity-80">
+                  Know a leader missing from the list? Submit them and bring
+                  them into the arena.
+                </p>
+              </div>
             </Link>
           </div>
         </div>
