@@ -87,7 +87,7 @@ export default function AddOpponent() {
           <div className="flex items-center justify-between gap-3">
             <button
               type="button"
-              className="text-sm text-muted hover:text-[var(--text)]transition"
+              className="text-sm text-muted hover:text-[var(--text)]transition cursor-pointer"
               onClick={() => {
                 setNameInput("");
                 setVideoInput("");
@@ -99,7 +99,7 @@ export default function AddOpponent() {
             </button>
             <button
               type="button"
-              className="bg-[var(--accent)] hover:bg-accent/90 text-[var(--text)] text-sm font-semibold px-6 py-2.5 rounded-lg transition-opacity hover:opacity-90"
+              className="bg-[var(--accent)] hover:bg-accent/90 text-[var(--text)] cursor-pointer text-sm font-semibold px-6 py-2.5 rounded-lg transition-opacity hover:opacity-90"
             >
               Add Opponent
             </button>
