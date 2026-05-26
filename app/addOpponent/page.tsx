@@ -52,7 +52,7 @@ export default function AddOpponent() {
           <div className="flex flex-col gap-5">
             {fields.map(({ label, placeholder, value, onChange, icon }) => (
               <div key={label}>
-                <label className="text-md font-semibold tracking-wider flex items-center gap-2 py-3">
+                <label className="text-md font-semibold flex items-center gap-2 py-3">
                   <span>{icon}</span>
                   {label}
                 </label>
@@ -67,7 +67,7 @@ export default function AddOpponent() {
 
             {/* Add additional information field */}
             <div>
-              <label className="text-md font-semibold tracking-wider flex items-center gap-2 py-3">
+              <label className="text-md font-semibold flex items-center gap-2 py-3">
                 <HelpCircle color="var(--text)" size={30} />
                 Additional Information About Opponent
               </label>
