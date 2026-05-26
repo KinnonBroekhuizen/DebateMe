@@ -35,32 +35,32 @@ export default function OpponentsPage() {
   return (
     <div className="min-h-screen font-sans">
       <main className="px-10 pt-10 pb-20">
-        <h2 className="text-6xl font-extrabold mb-10 text-black">
+        <h2 className="text-6xl font-extrabold mb-10 text-[var(--text)]">
           Select your opponent
         </h2>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 animate-fade-in-down">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
           {opponents.map((opponent) => (
             <Link
               key={opponent.id}
               href={`/chat/${opponent.id}`}
-              className="flex flex-col text-left rounded-xl overflow-hidden transition-opacity hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-[var(--accent)] bg-[var(--card)] shadow-sm"
+              className="flex flex-col p-2 text-left rounded-xl overflow-hidden transition-opacity hover:opacity-80 focus:outline-none focus:ring-2 bg-[var(--surface)] shadow-sm"
             >
               {/* Fixed-size image */}
               <div className="w-full h-90 overflow-hidden">
                 <img
                   src={opponent.image}
                   alt={opponent.name}
-                  className="w-full h-full object-cover object-top"
+                  className="w-full h-full object-cover object-top rounded-xl"
                 />
               </div>
 
               {/* Card body */}
               <div className="p-3">
-                <p className="font-bold text-3xl text-black leading-snug">
+                <p className="font-bold text-3xl text-[var(--text)] leading-snug">
                   {opponent.name}
                 </p>
-                <p className="text-xl mt-1 text-gray-800 leading-snug">
+                <p className="text-xl mt-1 text-[var(--muted)] leading-snug">
                   {opponent.description}
                 </p>
               </div>
