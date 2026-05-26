@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { User, Video, Image, HelpCircle } from "react-feather";
+import { User, Video, Image, Type, HelpCircle } from "react-feather";
 
 export default function AddOpponent() {
   const [nameInput, setNameInput] = useState("");
@@ -9,35 +9,38 @@ export default function AddOpponent() {
   const [photoInput, setPhotoInput] = useState("");
   const [infoInput, setInfoInput] = useState("");
   const [titleInput, setTitleInput] = useState("");
-  
-  const handleClick = async () =>{
-    if (!nameInput.trim() || !infoInput.trim() || !photoInput.trim() || !titleInput.trim()) {
+
+  const handleClick = async () => {
+    if (
+      !nameInput.trim() ||
+      !infoInput.trim() ||
+      !photoInput.trim() ||
+      !titleInput.trim()
+    ) {
       alert("Please fill in all fields.");
       return;
     }
-    const nameArray = nameInput.split(' ');
-    const idToAdd = nameArray[nameArray.length -1];
-    const { error } = await supabase
-    .from("ChatIdentifiers")
-    .insert({
-    id: idToAdd,
-    opponent_name: nameInput,
-    Information: infoInput,
-    image_link: photoInput,
-    title: titleInput
+    const nameArray = nameInput.split(" ");
+    const idToAdd = nameArray[nameArray.length - 1];
+    const { error } = await supabase.from("ChatIdentifiers").insert({
+      id: idToAdd,
+      opponent_name: nameInput,
+      Information: infoInput,
+      image_link: photoInput,
+      title: titleInput,
     });
 
     if (error) {
-        alert("Error inserting opponent: " + error.message);
+      alert("Error inserting opponent: " + error.message);
     } else {
-        alert("Opponent added successfully!");
-        setNameInput("");
-        setInfoInput("");
-        setPhotoInput("");
-        setVideoInput("");
-        setTitleInput("");
+      alert("Opponent added successfully!");
+      setNameInput("");
+      setInfoInput("");
+      setPhotoInput("");
+      setVideoInput("");
+      setTitleInput("");
     }
-    }
+  };
   const fields = [
     {
       label: "Opponent Name",
@@ -51,7 +54,7 @@ export default function AddOpponent() {
       placeholder: "e.g. Ex-Prime Minister with National",
       value: titleInput,
       onChange: setTitleInput,
-      icon: <User color="var(--text)" size={30} />,
+      icon: <Type color="var(--text)" size={30} />,
     },
     {
       label: "Video URL",
