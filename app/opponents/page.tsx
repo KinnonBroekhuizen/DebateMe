@@ -47,7 +47,7 @@ export default function OpponentsPage() {
               className="flex flex-col p-2 text-left rounded-xl overflow-hidden transition-opacity hover:opacity-80 focus:outline-none focus:ring-2 bg-[var(--surface)] shadow-sm"
             >
               {/* Fixed-size image */}
-              <div className="w-full h-90 overflow-hidden">
+              <div className="w-full h-120 overflow-hidden">
                 <img
                   src={opponent.image}
                   alt={opponent.name}
