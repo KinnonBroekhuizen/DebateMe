@@ -20,18 +20,20 @@ export default function Home() {
           <div className="flex items-stretch gap-4 justify-center mx-auto">
             <Link
               href="/opponents"
-              className="p-5 flex flex-col gap-2 justify-between rounded-md transition-opacity hover:opacity-90 max-w-120 bg-[var(--accent)]"
+              className="p-5 flex flex-col gap-1 rounded-md transition-opacity hover:opacity-90 max-w-120 bg-[var(--accent)]"
             >
-              <span className="font-bold text-2xl">Start Debating</span>
+              <span className="font-bold text-2xl underline">
+                Start Debating
+              </span>
               <p className="text-lg  leading-snug opacity-80">
-                Go head-to-head with a political leader. Pick your opponent,
-                choose a topic, and make your case in real time.
+                Go head-to-head with a political leader. Pick your opponent and
+                make your case in real time.
               </p>
             </Link>
 
             <Link
               href="/addOpponent"
-              className="p-5 flex flex-col gap-2 justify-between rounded-md transition-opacity hover:opacity-90 max-w-90 bg-[var(--muted-accent)]"
+              className="p-5 flex flex-col gap-1 rounded-md transition-opacity hover:opacity-90 max-w-90 bg-[var(--muted-accent)]"
             >
               <span className="font-bold text-2xl">Add Opponent</span>
               <p className="text-lg leading-snug opacity-80">
