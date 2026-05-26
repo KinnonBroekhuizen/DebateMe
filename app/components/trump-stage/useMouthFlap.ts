@@ -1,5 +1,6 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { getAudioContext } from "./audioContext";
 
 /**
  * Faithful React port of Cooper's `241 TTS/speechanimation.js`.

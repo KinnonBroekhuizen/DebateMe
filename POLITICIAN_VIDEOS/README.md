@@ -1,0 +1,1 @@
+These will store all the politician videos that we will use to generate videos of the politicians talking. These will already have been uploaded to cloudinary (the video to link software), but it is good to have them in the repository in case something happens and we have to relink them

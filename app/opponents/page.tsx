@@ -1,37 +1,41 @@
+"use client";
 import Link from "next/link";
-
-const opponents = [
-  {
-    id: "Luxon",
-    name: "Christopher Luxon",
-    description: "NZ's Minister and Leader of the National Party",
-    image:
-      "https://cdn.britannica.com/80/269080-050-C6EA1EB3/New-Zealand-Prime-Minister-Christopher-Luxon.jpg",
-  },
-  {
-    id: "Trump",
-    name: "Donald Trump",
-    description: "45th & 47th President of the USA. Republican",
-    image:
-      "https://www.whitehouse.gov/wp-content/uploads/2025/01/Donald-J-Trump.jpg",
-  },
-  {
-    id: "Seymour",
-    name: "David Seymour",
-    description: "Leader of the ACT party",
-    image:
-      "https://www.beehive.govt.nz/sites/default/files/styles/portrait_image/public/2025-05/headshot_David-Seymour_2.jpg?itok=59JJMpZ7",
-  },
-  {
-    id: "Peters",
-    name: "Winston Peters",
-    description: "Leader of NZ First",
-    image:
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdk4-gf-aokhWIS5JOox9reyi_N2b_BTPUyw&s",
-  },
-];
+import { supabase } from '@/lib/supabase';
+import {useEffect, useState} from 'react';
 
 export default function OpponentsPage() {
+  type Opponent = {
+    id: string;
+    name: string;
+    description: string;
+    image: string;
+  }
+  const [opponents, setOpponents] = useState<Opponent[]>([]);
+
+  useEffect(() => {
+    const fetchOpponents = async () => {
+      const { data, error } = await supabase
+        .from("ChatIdentifiers")
+        .select("id, opponent_name, Information, image_link");
+
+      if (error) {
+        console.error("Error fetching opponents:", error);
+        return;
+      }
+
+      // Map the DB columns to the shape your UI expects
+      const mapped = data.map((row) => ({
+        id: row.id,
+        name: row.opponent_name,
+        description: row.Information,
+        image: row.image_link,
+      }));
+
+      setOpponents(mapped);
+    };
+
+    fetchOpponents();
+  }, []);
   return (
     <div className="min-h-screen font-sans">
       <main className="px-10 pt-10 pb-20">
