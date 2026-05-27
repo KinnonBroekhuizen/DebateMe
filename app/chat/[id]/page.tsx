@@ -4,7 +4,7 @@ import { supabase } from "@/lib/supabase";
 import { useParams } from "next/navigation";
 import { useSpeechInput } from "./useSpeechInput";
 import TrumpStage from "@/app/components/trump-stage/TrumpStage";
-import { Mic, MicOff } from "react-feather";
+import { Mic, MicOff, User } from "react-feather";
 
 //message object, belongs to either an ooponent or the user
 type Message = {
@@ -115,7 +115,7 @@ export default function Chat() {
         <div id="chatContainer" className="flex-1 overflow-hidden">
           <div className="px-4 py-3 border-b border-gray-200 shrink-0">
             <p className="font-bold text-xl text-center">
-              {opponentName || "Donald Trump"}
+              {opponentName}
             </p>
           </div>
 
@@ -131,8 +131,8 @@ export default function Chat() {
                   key={msg.id}
                   className="flex items-start gap-2 max-w-[80%]"
                 >
-                  <div className="w-15 h-15 rounded-full bg-blue-100 flex items-center justify-center shrink-0 text-xs font-medium text-blue-700 text-center">
-                    {opponentName || "Trump"}
+                  <div className="w-15 h-15 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
+                    {<User color="var(--text)" size={30}/>}
                   </div>
                   <div className="bg-gray-100 rounded-tl-sm rounded-tr-xl rounded-br-xl rounded-bl-xl px-3 py-2 text-sm text-gray-800 leading-relaxed">
                     {msg.text}
@@ -149,8 +149,8 @@ export default function Chat() {
             )}
             {isLoading && (
               <div className="flex items-start gap-2 max-w-[80%]">
-                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center shrink-0 text-xs font-medium text-blue-700">
-                  {opponentName || "Trump"}
+                <div className="w-15 h-15 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
+                  {<User color="var(--text)" size={30}/>}
                 </div>
                 <div className="bg-gray-100 rounded-tl-sm rounded-tr-xl rounded-br-xl rounded-bl-xl px-4 py-3 flex gap-1 items-center">
                   <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:0ms]" />
