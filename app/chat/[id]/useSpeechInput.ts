@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+//Gets speech to text from the user to use as input
 declare global {
   interface Window {
     SpeechRecognition: typeof SpeechRecognition;
@@ -61,7 +62,7 @@ export function useSpeechInput() {
       const transcript = Array.from(event.results)
         .map((result: SpeechRecognitionResult) => result[0].transcript)
         .join("");
-      setText(transcript);  // ✅ setText not setInput
+      setText(transcript);
     };
 
     recognition.onerror = (event: SpeechRecognitionErrorEvent) => {

@@ -4,43 +4,63 @@ import { supabase } from "@/lib/supabase";
 import { User, Video, Image, Type, HelpCircle } from "react-feather";
 
 export default function AddOpponent() {
+  //Fields the user must input to add an opponent
   const [nameInput, setNameInput] = useState("");
-  const [videoInput, setVideoInput] = useState("");
+  const [videoFile, setVideoFile] = useState<File | null>(null);
   const [photoInput, setPhotoInput] = useState("");
   const [infoInput, setInfoInput] = useState("");
   const [titleInput, setTitleInput] = useState("");
 
   const handleClick = async () => {
+    //Makes sure all fields are entered
     if (
       !nameInput.trim() ||
       !infoInput.trim() ||
       !photoInput.trim() ||
-      !titleInput.trim()
+      !titleInput.trim() ||
+      !videoFile
     ) {
       alert("Please fill in all fields.");
       return;
     }
+    //gets video upload and adds it to the database
+    const fileName = `${Date.now()}_${videoFile.name}`;
+    const { error: uploadError } = await supabase.storage
+      .from("videos")
+      .upload(fileName, videoFile);
+    if (uploadError) {
+      alert("Error uploading video: " + uploadError.message);
+      return;
+    }
+    //creates the link between the table and file storage in the backend
+    const { data: { publicUrl } } = supabase.storage
+      .from("videos")
+      .getPublicUrl(fileName);
     const nameArray = nameInput.split(" ");
     const idToAdd = nameArray[nameArray.length - 1];
+    //uploads all fields into a new row of the database
     const { error } = await supabase.from("ChatIdentifiers").insert({
       id: idToAdd,
       opponent_name: nameInput,
       Information: infoInput,
       image_link: photoInput,
       title: titleInput,
+      video_url: publicUrl
     });
 
     if (error) {
       alert("Error inserting opponent: " + error.message);
     } else {
       alert("Opponent added successfully!");
+      //reset inputs
       setNameInput("");
       setInfoInput("");
       setPhotoInput("");
-      setVideoInput("");
+      setVideoFile(null);
       setTitleInput("");
     }
   };
+  //input fields
   const fields = [
     {
       label: "Opponent Name",
@@ -55,13 +75,6 @@ export default function AddOpponent() {
       value: titleInput,
       onChange: setTitleInput,
       icon: <Type color="var(--text)" size={30} />,
-    },
-    {
-      label: "Video URL",
-      placeholder: "https://youtube.com/...",
-      value: videoInput,
-      onChange: setVideoInput,
-      icon: <Video color="var(--text)" size={30} />,
     },
     {
       label: "Photo URL",
@@ -80,14 +93,14 @@ export default function AddOpponent() {
           <h1 className="text-4xl font-extrabold text-[var(--text)]leading-tight mb-3">
             Add A New Opponent
           </h1>
-          <p className="text-[var(--muted)] text-xl leading-relaxed">
-            Fill in all the required fields. Make sure the video and photo URLs
-            are publicly accessible.
+          <p className="text-(--muted) text-xl leading-relaxed">
+            Fill in all the required fields. Make sure the photo URL
+            is publicly accessible and the MP4 file is around 20s of uncut, uninterrupted footage of your opponent talking
           </p>
         </div>
 
-        {/* Card */}
-        <div className="bg-[var(--surface)] rounded-2xl p-8 flex flex-col gap-6">
+        {/* Input Fields */}
+        <div className="bg-(--surface) rounded-2xl p-8 flex flex-col gap-6">
           <div className="flex flex-col gap-5">
             {fields.map(({ label, placeholder, value, onChange, icon }) => (
               <div key={label}>
@@ -96,14 +109,38 @@ export default function AddOpponent() {
                   {label}
                 </label>
                 <input
-                  className="w-full bg-bg border border-border rounded-lg px-4 py-2.5 text-md text-[var(--text)] placeholder:text-[var(--muted)] outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20"
+                  className="w-full bg-bg border border-border rounded-lg px-4 py-2.5 text-md text-(--text) placeholder:text---muted) outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20"
                   placeholder={placeholder}
                   value={value}
                   onChange={(e) => onChange(e.target.value)}
                 />
               </div>
             ))}
-
+            {/* Video Upload Field*/}
+            <div>
+              <label className="text-md font-semibold flex items-center gap-2 py-3">
+                <Video color="var(--text)" size={30} />{/*Icon*/}
+                Opponent Video
+              </label>
+              <div className="flex justify-between items-center gap-3">
+                <input
+                  type="file"
+                  accept="video/mp4"
+                  id="video-upload"
+                  className="hidden"
+                  onChange={(e) => setVideoFile(e.target.files?.[0] || null)}
+                />
+                <span className="text-sm text---muted) truncate">
+                  {videoFile ? videoFile.name : "No file chosen"}
+                </span>
+                <label
+                  htmlFor="video-upload"
+                  className="cursor-pointer bg-(--accent) text-(--text) text-sm font-semibold px-5 py-2.5 rounded-lg hover:opacity-90 transition"
+                >
+                  Choose File
+                </label>
+              </div>
+            </div>
             {/* Add additional information field */}
             <div>
               <label className="text-md font-semibold flex items-center gap-2 py-3">
@@ -111,7 +148,7 @@ export default function AddOpponent() {
                 Additional Information About Opponent
               </label>
               <textarea
-                className="w-full h-36 bg-bg border border-border rounded-lg px-4 py-2.5 text-md text-[var(--text)] resize-none placeholder:text-[var(--muted)]  outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20"
+                className="w-full h-36 bg-bg border border-border rounded-lg px-4 py-2.5 text-md text-(--text) resize-none placeholder:text-(--muted)  outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20"
                 placeholder="e.g. Political party, political leaning, etc. The more detail you provide, the more accurately the AI can replicate them."
                 value={infoInput}
                 onChange={(e) => setInfoInput(e.target.value)}
@@ -128,8 +165,9 @@ export default function AddOpponent() {
               type="button"
               className="text-sm text-muted hover:text-[var(--text)]transition cursor-pointer"
               onClick={() => {
+                {/*Clear fields*/}
                 setNameInput("");
-                setVideoInput("");
+                setVideoFile(null);
                 setPhotoInput("");
                 setInfoInput("");
                 setTitleInput("");
@@ -139,7 +177,7 @@ export default function AddOpponent() {
             </button>
             <button
               type="button"
-              className="bg-[var(--accent)] shadow-[0_4px_20px_0_var(--muted-accent)] hover:bg-accent/90 text-[var(--text)] cursor-pointer text-sm font-semibold px-6 py-2.5 rounded-lg transition-opacity hover:opacity-90"
+              className="bg-(--accent) shadow-[0_4px_20px_0_var(--muted-accent)] hover:bg-accent/90 text-(--text) cursor-pointer text-sm font-semibold px-6 py-2.5 rounded-lg transition-opacity hover:opacity-90"
               onClick={handleClick}
             >
               Add Opponent

@@ -13,6 +13,7 @@ type Message = {
   text: string;
 };
 
+//The objects the backend sends back to be displayed/outputted to user
 type DebateResponse = {
   reply: string;
   audio: string | null;
@@ -31,7 +32,7 @@ export default function Chat() {
     toggleListening,
   } = useSpeechInput();
   const [opponentName, setOpponentName] = useState<string>(""); //gets opponent name from the database and ID
-  //fethces opponent information and starting layout from the database
+  //fetches opponent information and starting layout from the database
   useEffect(() => {
     const fetchData = async () => {
       const { data, error } = await supabase
@@ -57,6 +58,7 @@ export default function Chat() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  //sends user input to backend
   const sendMessage = async () => {
     if (!input.trim()) return;
     const currentInput = input;
@@ -65,7 +67,7 @@ export default function Chat() {
       role: "user",
       text: currentInput,
     };
-    setMessages((prev) => [...prev, userMsg]);
+    setMessages((prev) => [...prev, userMsg]); //adds message to the chat messages
     setInput("");
     setIsLoading(true);
     const contextString = messages
@@ -153,9 +155,9 @@ export default function Chat() {
                   {<User color="var(--text)" size={30}/>}
                 </div>
                 <div className="bg-gray-100 rounded-tl-sm rounded-tr-xl rounded-br-xl rounded-bl-xl px-4 py-3 flex gap-1 items-center">
-                  <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:0ms]" />
-                  <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:150ms]" />
-                  <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:300ms]" />
+                  <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce animation-delay-none" />
+                  <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce animation-delay-150ms" />
+                  <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce animation-delay-300ms" />
                 </div>
               </div>
             )}
@@ -174,6 +176,7 @@ export default function Chat() {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && sendMessage()}
             />
+            {/*The microphone input for the user text box */}
             <button
               onClick={toggleListening}
               title={isListening ? "Stop listening" : "Start listening"}
