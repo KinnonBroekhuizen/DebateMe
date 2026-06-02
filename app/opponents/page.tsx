@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
-import { supabase } from '@/lib/supabase';
-import {useEffect, useState} from 'react';
+import { supabase } from "@/lib/supabase";
+import { useEffect, useState } from "react";
 
 export default function OpponentsPage() {
   type Opponent = {
@@ -9,14 +9,14 @@ export default function OpponentsPage() {
     name: string;
     description: string;
     image: string;
-  }
+  };
   const [opponents, setOpponents] = useState<Opponent[]>([]);
 
   useEffect(() => {
     const fetchOpponents = async () => {
       const { data, error } = await supabase
         .from("ChatIdentifiers")
-        .select("id, opponent_name, Information, image_link");
+        .select("id, opponent_name, title, image_link");
 
       if (error) {
         console.error("Error fetching opponents:", error);
@@ -27,7 +27,7 @@ export default function OpponentsPage() {
       const mapped = data.map((row) => ({
         id: row.id,
         name: row.opponent_name,
-        description: row.Information,
+        description: row.title,
         image: row.image_link,
       }));
 
@@ -39,32 +39,32 @@ export default function OpponentsPage() {
   return (
     <div className="min-h-screen font-sans">
       <main className="px-10 pt-10 pb-20">
-        <h2 className="text-6xl font-extrabold mb-10 text-black">
+        <h2 className="text-6xl font-extrabold mb-10 text-[var(--text)]">
           Select your opponent
         </h2>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 animate-fade-in-down">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
           {opponents.map((opponent) => (
             <Link
               key={opponent.id}
               href={`/chat/${opponent.id}`}
-              className="flex flex-col text-left rounded-xl overflow-hidden transition-opacity hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-[var(--accent)] bg-[var(--card)] shadow-sm"
+              className="flex flex-col p-2 text-left rounded-xl overflow-hidden transition-opacity hover:opacity-80 focus:outline-none focus:ring-2 bg-[var(--surface)] shadow-sm"
             >
               {/* Fixed-size image */}
-              <div className="w-full h-90 overflow-hidden">
+              <div className="w-full h-120 overflow-hidden">
                 <img
                   src={opponent.image}
                   alt={opponent.name}
-                  className="w-full h-full object-cover object-top"
+                  className="w-full h-full object-cover object-top rounded-xl"
                 />
               </div>
 
               {/* Card body */}
               <div className="p-3">
-                <p className="font-bold text-3xl text-black leading-snug">
+                <p className="font-bold text-3xl text-[var(--text)] text-[var(--text-alt)] text-center leading-snug pb-1">
                   {opponent.name}
                 </p>
-                <p className="text-xl mt-1 text-gray-800 leading-snug">
+                <p className="text-xl mt-1 text-[var(--text)] text-[var(--text-alt)] text-center leading-snug">
                   {opponent.description}
                 </p>
               </div>
