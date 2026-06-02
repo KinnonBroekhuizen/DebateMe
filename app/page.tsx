@@ -26,7 +26,7 @@ export default function Home() {
           <div className="justify-end flex gap-4 text-[var(--text-alt)]">
             <Link
               href="/opponents"
-              className="p-7 flex justify-between flex-row items-center gap-5 rounded-md transition-shadow hover:shadow-[0_8px_25px_0_var(--muted-accent)] duration-700 ease-in-out delay-75 max-w-120 max-h-25 bg-[var(--accent)]"
+              className="p-7 flex justify-between flex-row items-center gap-5 rounded-md transition-shadow hover:shadow-[0_8px_25px_0_var(--muted-accent)] duration-700 ease-in-out max-w-120 max-h-25 bg-[var(--accent)]"
             >
               <MessageSquare size={100} />
               <div>

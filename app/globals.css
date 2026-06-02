@@ -31,4 +31,8 @@ body {
   background-color: var(--bg);
   color: var(--text);
   font-family: Arial, Helvetica, sans-serif;
+  transition: all;
+  transition-timing-function: ease-in-out;
+  transition-delay: 10ms;
+  transition-duration: 500ms;
 }

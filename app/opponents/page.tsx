@@ -61,10 +61,10 @@ export default function OpponentsPage() {
 
               {/* Card body */}
               <div className="p-3">
-                <p className="font-bold text-3xl text-[var(--text)] text-[var(--text-alt)] leading-snug">
+                <p className="font-bold text-3xl text-[var(--text)] text-[var(--text-alt)] text-center leading-snug pb-1">
                   {opponent.name}
                 </p>
-                <p className="text-xl mt-1 text-[var(--text)] text-[var(--text-alt)] leading-snug">
+                <p className="text-xl mt-1 text-[var(--text)] text-[var(--text-alt)] text-center leading-snug">
                   {opponent.description}
                 </p>
               </div>
