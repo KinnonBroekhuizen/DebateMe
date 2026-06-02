@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
-import { supabase } from '@/lib/supabase';
-import {useEffect, useState} from 'react';
+import { supabase } from "@/lib/supabase";
+import { useEffect, useState } from "react";
 
 export default function OpponentsPage() {
   type Opponent = {
@@ -9,7 +9,7 @@ export default function OpponentsPage() {
     name: string;
     description: string;
     image: string;
-  }
+  };
   const [opponents, setOpponents] = useState<Opponent[]>([]);
 
   useEffect(() => {
@@ -61,10 +61,10 @@ export default function OpponentsPage() {
 
               {/* Card body */}
               <div className="p-3">
-                <p className="font-bold text-3xl text-[var(--text)] leading-snug">
+                <p className="font-bold text-3xl text-[var(--text)] text-[var(--text-alt)] leading-snug">
                   {opponent.name}
                 </p>
-                <p className="text-xl mt-1 text-[var(--muted)] leading-snug">
+                <p className="text-xl mt-1 text-[var(--text)] text-[var(--text-alt)] leading-snug">
                   {opponent.description}
                 </p>
               </div>

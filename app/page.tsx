@@ -23,10 +23,10 @@ export default function Home() {
           </p>
 
           {/* Buttons */}
-          <div className="justify-end flex gap-4">
+          <div className="justify-end flex gap-4 text-[var(--text-alt)]">
             <Link
               href="/opponents"
-              className="p-7 flex justify-between flex-row items-center gap-5 rounded-md transition-shadow hover:shadow-[0_8px_25px_0_var(--muted-accent)] duration-700 ease-in-out delay-75 max-w-120 max-h-25 bg-[var(--accent)] "
+              className="p-7 flex justify-between flex-row items-center gap-5 rounded-md transition-shadow hover:shadow-[0_8px_25px_0_var(--muted-accent)] duration-700 ease-in-out delay-75 max-w-120 max-h-25 bg-[var(--accent)]"
             >
               <MessageSquare size={100} />
               <div>
@@ -57,13 +57,13 @@ export default function Home() {
 
       {/* Features Section */}
       <section className="px-10 pt-16 pb-24">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-45 max-w-9xl mx-auto bg-[var(--surface)] p-10 rounded-md">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-45 max-w-9xl mx-auto bg-[var(--surface)] p-10 rounded-md text-[var(--text)] text-[var(--text-alt)]">
           {/* Feature 1 */}
           <div className="flex flex-col items-center text-center gap-6">
             <div className="rounded-md p-4 w-50 h-40 flex items-center justify-center">
-              <Clock color="var(--text)" size={120} />
+              <Clock size={120} />
             </div>
-            <p className="text-2xl font-semibold text-[var(--text)] leading-snug">
+            <p className="text-2xl font-semibold leading-snug">
               Challenge Christopher Luxon and other political leaders in real
               time.
             </p>
@@ -72,9 +72,9 @@ export default function Home() {
           {/* Feature 2 */}
           <div className="flex flex-col items-center text-center gap-6">
             <div className="p-4 w-50 h-40 flex items-center justify-center">
-              <HelpCircle color="var(--text)" size={120} />
+              <HelpCircle size={120} />
             </div>
-            <p className="text-2xl font-semibold text-[var(--text)] leading-snug">
+            <p className="text-2xl font-semibold leading-snug">
               Your questions shape the conversation and hold leaders
               accountable.
             </p>
@@ -83,9 +83,9 @@ export default function Home() {
           {/* Feature 3 */}
           <div className="flex flex-col items-center text-center gap-6">
             <div className="rounded-md p-4 w-50 h-40 flex items-center justify-center">
-              <FileText color="var(--text)" size={120} />
+              <FileText size={120} />
             </div>
-            <p className="text-2xl font-semibold text-[var(--text)] leading-snug">
+            <p className="text-2xl font-semibold  leading-snug">
               Watch unscripted exchanges where ideas collide and truth emerges.
             </p>
           </div>

@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "tailwindcss-animated";
 
+/* Default dark */
 :root {
   --bg: #1f1f1e;
   --surface: #2c2c2b;
@@ -9,6 +10,21 @@
   --muted: #9e9685;
   --accent: #83552afa;
   --muted-accent: #633d19fa;
+  --icon: #c2c2b6;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #f8f8f7;
+    --surface: #1f1f1e;
+    --border: #45af53;
+    --text: #444444;
+    --text-alt: #f8f8f7;
+    --icon: #f8f8f7;
+    --muted: #3f3f3f;
+    --muted-accent: #83552afa;
+    --accent: #a3702efa;
+  }
 }
 
 body {
