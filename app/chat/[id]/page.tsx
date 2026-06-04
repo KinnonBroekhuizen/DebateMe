@@ -70,9 +70,10 @@ export default function Chat() {
     setMessages((prev) => [...prev, userMsg]); //adds message to the chat messages
     setInput("");
     setIsLoading(true);
-    const contextString = messages
-      .map((m) => `${m.role}: ${m.text}`)
-      .join(". ");
+    // prior turns (oldest-first) become the opponent's memory of the chat.
+    // `messages` here is the snapshot BEFORE this question, which is exactly
+    // the history we want — the current question rides in `question`.
+    const history = messages.map((m) => ({ role: m.role, text: m.text }));
 
     try {
       //question -> AI -> audio -> lip-sync video, all in one call
@@ -82,7 +83,7 @@ export default function Chat() {
         body: JSON.stringify({
           question: currentInput,
           character: opponentName || resolvedId || "Donald Trump",
-          context: contextString,
+          history,
         }),
       });
       if (!res.ok) throw new Error(`backend ${res.status}`);

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # script to run the project locally
 # backend = fastapi on port 8000, frontend = next.js on port 3000
-# need ollama installed with dolphin3:8b
+# need ollama installed with llama3.1:8b
 
 set -e
 
@@ -29,9 +29,10 @@ echo "installing python packages"
 pip install -q -r requirements.txt
 
 # pull the ollama model if we dont have it
-if ! ollama list | grep -q "dolphin3:8b"; then
+# must match the model askAI() uses in AI_Response.py (llama3.1:8b)
+if ! ollama list | grep -q "llama3.1:8b"; then
   echo "downloading ollama model (this is big)"
-  ollama pull dolphin3:8b
+  ollama pull llama3.1:8b
 fi
 
 # install frontend packages
@@ -49,14 +50,31 @@ else
   grep -q "NEXT_PUBLIC_SUPABASE_URL=." .env || echo "warning: supabase keys not in .env"
 fi
 
+# free our ports first. orphaned servers from a previous run (e.g. a closed
+# terminal that skipped the cleanup trap) keep squatting on these ports. when
+# 3000 is taken, next.js silently drifts the frontend to :3001 — so you open
+# :3000, hit the dead server, and get a confusing "Internal Server Error".
+free_port() {
+  local port=$1
+  local pids
+  pids=$(lsof -tiTCP:"$port" -sTCP:LISTEN 2>/dev/null || true)
+  if [ -n "$pids" ]; then
+    echo "freeing port $port (stopping stale server: $pids)"
+    kill -9 $pids 2>/dev/null || true
+  fi
+}
+free_port 8000
+free_port 3000
+
 # start the backend
 echo "starting backend on http://localhost:8000"
 uvicorn AI_Response:app --host 0.0.0.0 --port 8000 --reload > .logs/backend.log 2>&1 &
 BACKEND_PID=$!
 
-# start the frontend
+# start the frontend. pin to :3000 so it fails loudly if the port is somehow
+# still taken, instead of quietly drifting to another port.
 echo "starting frontend on http://localhost:3000"
-npm run dev > .logs/frontend.log 2>&1 &
+npm run dev -- --port 3000 > .logs/frontend.log 2>&1 &
 FRONTEND_PID=$!
 
 echo "both servers running."

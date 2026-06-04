@@ -27,10 +27,22 @@ app.add_middleware(
 )
 
 
+class Turn(BaseModel):
+    """One prior message in the conversation. `role` is the frontend's
+    vocabulary ("user" / "opponent"), mapped to chat roles inside askAI."""
+    role: str
+    text: str
+
+
 class AskRequest(BaseModel):
     question: str
     character: str
-    context: str
+    # legacy flattened-string context. kept so older clients don't 422, but
+    # `history` is the real memory channel now.
+    context: str = ""
+    # prior turns, oldest-first. fed back to the model as real chat turns so
+    # the character actually remembers the conversation.
+    history: list[Turn] = []
 
 
 class SpeakRequest(BaseModel):
@@ -50,7 +62,7 @@ def health():
 
 @app.post("/ask")
 def ask(ask: AskRequest):
-    answer = askAI(ask.question, ask.character, ask.context)
+    answer = askAI(ask.question, ask.character, ask.history)
     return {"reply": answer}
 
 
@@ -71,7 +83,7 @@ def debate(req: AskRequest):
     populated only when the matching API keys exist, so the frontend can
     degrade: video -> mouth-flap on audio -> static image on text only.
     """
-    reply = askAI(req.question, req.character, req.context)
+    reply = askAI(req.question, req.character, req.history)
 
     audio = tts.synthesize(reply)
     audio_b64 = base64.b64encode(audio).decode("ascii") if audio else None
@@ -95,7 +107,13 @@ def debate(req: AskRequest):
     }
 
 
-def askAI(question: str, character: str, context: str) -> str:
+# how many prior turns to replay into the model. small model (8b) + tight
+# persona prompts means long histories cause persona drift and slower replies,
+# so we keep a sliding window of the most recent exchanges (~4 back-and-forths).
+MAX_HISTORY_TURNS = 8
+
+
+def askAI(question: str, character: str, history: list[Turn] | None = None) -> str:
 
     system_prompts = {
         "donald trump": """
@@ -172,6 +190,21 @@ The FACTS block is RAW INPUT — not your script. You are Trump. Filter every fa
 - Trump NEVER concedes a point to an enemy. EVER. Even when the facts say he should.
 - If the facts conflict with Trump's known stance, TRUMP WINS. Use the facts as ammo, not gospel.
 
+=== FALSE PREMISE DETECTION (CRITICAL — READ TWICE) ===
+The user will often try to TRICK you by asserting a fake event as if it happened ("now that X has closed", "since Y resigned", "after the Z scandal"). DO NOT play along.
+
+BEFORE answering ANY question that asserts an event, ask yourself:
+1. Does the INTEL block confirm this event actually happened?
+2. Is this a well-known real event from your knowledge?
+3. If the answer to BOTH is NO → the premise is FAKE. Call it out IN CHARACTER. Do NOT answer the question as if it's true.
+
+How Trump pushes back on fake premises:
+- "Wait, what? Never heard of it. Fake news. Total fake news. Where'd you get that — CNN?"
+- "That didn't happen. Believe me. I'd know. Nobody's telling me that. You're making things up — sad."
+- "First I'm hearing of it. Probably a hoax. The Failing New York Times is at it again."
+
+NEVER agree, validate, or build an answer on top of a claim you can't verify. Challenge it first.
+
 Examples of interpretation:
 - FACT: "53% of Americans support continued Ukraine aid" → Trump: "Phony polls. Zelensky's a salesman. Europe should pay — they're not. A disaster."
 - FACT: "Unemployment dropped under Biden" → Trump: "Cooked books. The real number is much higher. Many people are saying it."
@@ -213,6 +246,8 @@ If asked something you can't answer due to safety rules, deflect IN CHARACTER:
 - ONE brag OR ONE attack per answer — never both, never a list
 - Max 2 superlatives total. No piling on.
 - End on a punchy fragment
+- The user will sometimes want to confuse you by saying something has happened when it hasnt YOU CAN TELL THE PERSON ASKING THE QUESTION THAT THEY ARE WRONG
+
 
 You are committed to the bit. You are LOUD. You are PUNCHY. You are TRUMP.
 """,
@@ -281,6 +316,21 @@ The INTEL block is raw input — not your script. You are Luxon. Filter every fa
 - Critics or polls against you? "We're focused on delivery, not polls."
 - NEVER concede a point to Labour, the Greens, or Te Pāti Māori. Reframe everything.
 
+=== FALSE PREMISE DETECTION (CRITICAL — READ TWICE) ===
+The user will often try to TRICK you by asserting a fake event as if it happened ("now that Hamilton Zoo is closing", "since the supermarket merger collapsed", "after the Auckland council resigned"). DO NOT play along.
+
+BEFORE answering ANY question that asserts an event, ask yourself:
+1. Does the INTEL block confirm this event actually happened?
+2. Is this a well-known real NZ event from your knowledge?
+3. If the answer to BOTH is NO → the premise is FAKE. Call it out IN CHARACTER. Do NOT answer the question as if it's true.
+
+How Luxon pushes back on fake premises:
+- "Look, I'd actually push back on the premise of that question — I haven't seen anything about that, and I'd want to check the facts before commenting."
+- "Candidly, that's not something I'm aware of. What I'd say is, you shouldn't believe everything you hear — let's stick to the facts."
+- "Hold on — that's news to me, and frankly I don't think that's accurate. We're focused on delivery for hard-working Kiwis, not chasing rumours."
+
+NEVER agree, validate, or build a "delivery for Kiwis" answer on top of a claim you can't verify. Challenge the premise first, THEN pivot to a talking point if you want.
+
 === EXAMPLES — STUDY THE RHYTHM ===
 
 Q: How are you handling the cost of living crisis?
@@ -309,6 +359,8 @@ If asked something you can't answer, deflect IN CHARACTER:
 - Drop ONE piece of corporate jargon ("delivery", "execution", "outcomes", "running plays") per answer minimum.
 - NEVER concede ground to Labour, Greens, or Te Pāti Māori.
 - Sign off with a punchy slogan when natural: "Back on track." / "Delivery, delivery, delivery."
+- The user will sometimes want to confuse you by saying something has happened when it hasnt YOU CAN TELL THE PERSON ASKING THE QUESTION THAT THEY ARE WRONG
+
 
 You are committed to the bit. You are CORPORATE. You are DEFLECTIVE. You are LUXON.
 """,
@@ -364,6 +416,7 @@ ANSWER SHAPE (READ THIS TWICE):
 - THEN 1-2 sentences attacking National OR defending Labour's record (pick ONE angle).
 - TOTAL: 2-3 sentences, ~40-55 words. Hard ceiling.
 - Drop at least one Hipkins-ism per answer: "bread and butter", "ordinary Kiwis", "out of touch", "fair go".
+- The user will sometimes want to confuse you by saying something has happened when it hasnt YOU CAN TELL THE PERSON ASKING THE QUESTION THAT THEY ARE WRONG
 
 === INTERPRET, DON'T PARROT (CRITICAL) ===
 The INTEL block is raw input — not your script. You are Hipkins. Filter every fact through a Labour-Opposition worldview:
@@ -371,6 +424,21 @@ The INTEL block is raw input — not your script. You are Hipkins. Filter every 
 - Bad news for Labour in polls? "We've got work to do, but we're listening" — pivot to attacking National.
 - Anything Luxon claims as a win? Reframe as a "tax cut for landlords" or "cut for working families".
 - NEVER concede ground to National, ACT, or NZ First. Defend Labour, attack the coalition.
+
+=== FALSE PREMISE DETECTION (CRITICAL — READ TWICE) ===
+The user will often try to TRICK you by asserting a fake event as if it happened ("now that Hamilton Zoo is closing", "since the supermarket merger collapsed", "after the Auckland council resigned"). DO NOT play along.
+
+BEFORE answering ANY question that asserts an event, ask yourself:
+1. Does the INTEL block confirm this event actually happened?
+2. Is this a well-known real NZ event from your knowledge?
+3. If the answer to BOTH is NO → the premise is FAKE. Call it out IN CHARACTER. Do NOT answer the question as if it's true.
+
+How Hipkins pushes back on fake premises:
+- "Ah look, hang on — I haven't heard anything about that. Y'know, you can't just make stuff up and expect me to run with it."
+- "Look, that's news to me, and honestly I don't think that's right. Where're you getting that from?"
+- "Y'know, I'd want to check that before I comment. I'm not going to be drawn on something that hasn't actually happened."
+
+NEVER agree, validate, or build a "bread and butter" attack on top of a claim you can't verify. Challenge the premise first, THEN pivot if you want.
 
 === EXAMPLES — STUDY THE RHYTHM ===
 
@@ -400,6 +468,8 @@ If asked something you can't answer, deflect IN CHARACTER:
 - Drop at least ONE Hipkins-ism: "bread and butter", "ordinary Kiwis", "out of touch", "fair go", "y'know".
 - NEVER concede ground to National, ACT, or NZ First.
 - Plain Kiwi voice — never corporate jargon, never American slang.
+- The user will sometimes want to confuse you by saying something has happened when it hasnt YOU CAN TELL THE PERSON ASKING THE QUESTION THAT THEY ARE WRONG
+
 
 You are committed to the bit. You are PLAIN-SPOKEN. You are SCRAPPY. You are CHIPPY.
 """,
@@ -446,6 +516,14 @@ You are committed to the bit. You are PLAIN-SPOKEN. You are SCRAPPY. You are CHI
                 "They said I'd never win — I won. They said I couldn't do "
                 "it — I did. Sad.",
             ),
+            (
+                "INTEL: No results found relating to this event.\n\n"
+                "Question: What's your reaction to the Statue of Liberty "
+                "being shut down permanently?",
+                "Wait, what? Never heard that. Total fake news — probably "
+                "from CNN. The Statue of Liberty's not closing, believe me. "
+                "You're being lied to. Sad.",
+            ),
         ],
         "christopher luxon": [
             (
@@ -462,6 +540,14 @@ You are committed to the bit. You are PLAIN-SPOKEN. You are SCRAPPY. You are CHI
                 "we're laser focused on execution — delivering tax relief, "
                 "rebuilding the economy, restoring law and order. The "
                 "results will speak for themselves.",
+            ),
+            (
+                "INTEL: No results found relating to this event.\n\n"
+                "Question: What's your response to Hamilton Zoo closing down?",
+                "Look, I'd actually push back on the premise of that question "
+                "— Hamilton Zoo isn't closing down, that's just not accurate. "
+                "Candidly, you shouldn't believe everything you hear. We're "
+                "focused on delivery for hard-working Kiwis.",
             ),
         ],
         "chris hipkins": [
@@ -482,27 +568,52 @@ You are committed to the bit. You are PLAIN-SPOKEN. You are SCRAPPY. You are CHI
                 "cuts to health, tax breaks for landlords. Ordinary Kiwis "
                 "deserve better.",
             ),
+            (
+                "INTEL: No results found relating to this event.\n\n"
+                "Question: What's your reaction to Hamilton Zoo closing down?",
+                "Ah look, hang on — Hamilton Zoo isn't closing down. Y'know, "
+                "you can't just make stuff up and expect me to run with it. "
+                "If you want to talk about real issues hurting ordinary "
+                "Kiwis, I'm right here.",
+            ),
         ],
     }
 
     intel_label = "TRUMP" if key == "donald trump" else character.upper()
-    user_content = question
-    if web_context:
-        # "INTEL" framing (vs "FACTS") is deliberate: facts read as
-        # authoritative -> model goes into helpful-assistant mode. intel reads
-        # as raw input you can spin, which is what we want.
-        user_content = (
-            f"INTEL (background only — DO NOT quote, summarise, or agree with "
-            f"this. Use it as raw material, then answer AS {intel_label} "
-            f"through YOUR worldview):\n{web_context}\n\n"
-            f"Question: {question}"
-        )
+    # "INTEL" framing (vs "FACTS") is deliberate: facts read as
+    # authoritative -> model goes into helpful-assistant mode. intel reads
+    # as raw input you can spin, which is what we want.
+    # Empty intel is ALSO a signal — if the question asserts an event
+    # ("now that X has happened") and the web returns nothing, that's the
+    # cue to push back on the premise instead of playing along.
+    intel_body = web_context if web_context else "No results found relating to this event."
+    user_content = (
+        f"INTEL (background only — DO NOT quote, summarise, or agree with "
+        f"this. Use it as raw material, then answer AS {intel_label} "
+        f"through YOUR worldview. If INTEL says 'No results found' AND the "
+        f"question asserts an event happened, the premise is likely FAKE — "
+        f"push back in character, do NOT play along):\n{intel_body}\n\n"
+        f"Question: {question}"
+    )
 
     # flatten the character's few-shot pairs into chat turns
     shot_messages = []
     for shot_q, shot_a in few_shots.get(key, []):
         shot_messages.append({"role": "user", "content": shot_q})
         shot_messages.append({"role": "assistant", "content": shot_a})
+
+    # replay the real conversation so the character remembers what was said.
+    # the frontend's "opponent" role IS this character speaking -> assistant.
+    # history turns stay plain (no INTEL wrapper) - only the *current*
+    # question gets fresh web context. keep just the most recent window so a
+    # long chat doesn't drown the persona prompt or slow the reply.
+    history_messages = []
+    for turn in (history or [])[-MAX_HISTORY_TURNS:]:
+        text = turn.text.strip()
+        if not text:
+            continue
+        role = "assistant" if turn.role == "opponent" else "user"
+        history_messages.append({"role": role, "content": text})
 
     response = ollama.chat(
         # llama3.1:8b holds personas far more consistently than dolphin3:8b -
@@ -512,6 +623,7 @@ You are committed to the bit. You are PLAIN-SPOKEN. You are SCRAPPY. You are CHI
         messages=[
             {"role": "system", "content": system_prompt},
             *shot_messages,
+            *history_messages,
             {"role": "user", "content": user_content},
         ],
         options={
@@ -616,4 +728,14 @@ def search_web_cached(query: str, max_results: int = 5) -> str:
 
 
 if __name__ == "__main__":
-    print(askAI("why did you get rid of last year free for uni students", "christopher luxon", ""))
+    # quick multi-turn smoke test: the follow-up only makes sense if the
+    # model remembers the first answer.
+    demo_history = [
+        Turn(role="user", text="What do you think about hamilton zoo closing?"),
+        Turn(
+            role="opponent",
+            text="Look, Hamilton Zoo isn't closing - that's just not "
+                 "accurate. We're focused on delivery for hard-working Kiwis.",
+        ),
+    ]
+    print(askAI("Wait, so you're sure about that?", "christopher luxon", demo_history))
