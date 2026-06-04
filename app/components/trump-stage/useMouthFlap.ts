@@ -2,20 +2,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getAudioContext } from "./audioContext";
 
-/**
- * Faithful React port of Cooper's `241 TTS/speechanimation.js`.
- *
- * Same algorithm as the branch code: a 256-point FFT analyser, average the
- * voice-band bins 2..18 into one loudness number, and show the open mouth
- * when that average is above 150 (closed otherwise). The only change is the
- * audio source: the `/debate` pipeline already returns base64 MP3, so we
- * decode that instead of re-fetching `/speak`.
- */
-
 const FFT_SIZE = 256;
 const VOICE_BAND_START = 2;
 const VOICE_BAND_END = 18;
-const LOUDNESS_THRESHOLD = 150;
+const LOUDNESS_THRESHOLD = 60; // lowered from 150 to work with 4 frames
 
 function base64ToArrayBuffer(b64: string): ArrayBuffer {
   const binary = atob(b64);
@@ -26,12 +16,14 @@ function base64ToArrayBuffer(b64: string): ArrayBuffer {
 
 interface MouthFlap {
   mouthOpen: boolean;
+  mouthLevel: number; // 0-1 normalised loudness for 4-frame support
   playing: boolean;
   play: () => void;
 }
 
 export function useMouthFlap(audioBase64: string | null | undefined): MouthFlap {
   const [mouthOpen, setMouthOpen] = useState(false);
+  const [mouthLevel, setMouthLevel] = useState(0);
   const [playing, setPlaying] = useState(false);
 
   const audioCtxRef = useRef<AudioContext | null>(null);
@@ -41,6 +33,7 @@ export function useMouthFlap(audioBase64: string | null | undefined): MouthFlap 
     if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
     rafRef.current = null;
     setMouthOpen(false);
+    setMouthLevel(0);
     setPlaying(false);
   }, []);
 
@@ -62,7 +55,7 @@ export function useMouthFlap(audioBase64: string | null | undefined): MouthFlap 
         base64ToArrayBuffer(audioBase64),
       );
     } catch {
-      return; // undecodable audio — leave mouth closed
+      return;
     }
 
     const analyser = audioCtx.createAnalyser();
@@ -80,7 +73,9 @@ export function useMouthFlap(audioBase64: string | null | undefined): MouthFlap 
       analyser.getByteFrequencyData(dataArray);
       const band = dataArray.slice(VOICE_BAND_START, VOICE_BAND_END);
       const avg = band.reduce((a, b) => a + b, 0) / band.length;
+      const level = Math.min(avg / 130, 1); // normalise to 0-1
       setMouthOpen(avg > LOUDNESS_THRESHOLD);
+      setMouthLevel(level);
       rafRef.current = requestAnimationFrame(tick);
     };
     tick();
@@ -88,12 +83,10 @@ export function useMouthFlap(audioBase64: string | null | undefined): MouthFlap 
     source.onended = () => stop();
   }, [audioBase64, stop]);
 
-  // Auto-play whenever a new clip arrives (the Send click already satisfied
-  // the browser autoplay gesture requirement).
   useEffect(() => {
     if (audioBase64) play();
     return stop;
   }, [audioBase64, play, stop]);
 
-  return { mouthOpen, playing, play };
+  return { mouthOpen, mouthLevel, playing, play };
 }

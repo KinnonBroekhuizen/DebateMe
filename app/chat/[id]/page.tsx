@@ -3,7 +3,7 @@ import { useRef, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useParams } from "next/navigation";
 import { useSpeechInput } from "./useSpeechInput";
-import TrumpStage from "@/app/components/trump-stage/TrumpStage";
+import PoliticianStage from "@/app/components/trump-stage/PoliticianStage";
 import { Mic, MicOff, User } from "react-feather";
 
 //message object, belongs to either an ooponent or the user
