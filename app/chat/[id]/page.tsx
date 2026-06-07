@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import { useSpeechInput } from "./useSpeechInput";
 import PoliticianStage from "@/app/components/trump-stage/PoliticianStage";
 import { unlockAudio } from "@/app/components/trump-stage/audioContext";
-import { Mic, MicOff, User } from "react-feather";
+import { Mic, MicOff, Send, User } from "react-feather";
 
 //message object, belongs to either an ooponent or the user
 type Message = {
@@ -124,104 +124,106 @@ export default function Chat() {
   };
 
   return (
-    <main className="flex-1 min-h-0 flex">
-      {/* Fill the space the navbar leaves: the stage and chat panel take the
-          full remaining height, and the chat panel is a flex column so its
-          message list flexes between the header and the input bar. */}
-      <div id="mainContainer" className="flex flex-1 min-h-0">
-        {/* Chat panel is left aligned */}
-        <div id="chatContainer" className="flex-1 flex flex-col overflow-hidden">
-          <div className="px-4 py-3 border-b border-gray-200 shrink-0">
-            <p className="font-bold text-xl text-center">
-              {opponentName}
+    <main className="h-dvh bg-[var(--bg)] px-3 py-3 text-[var(--text)] sm:px-5 sm:py-5">
+      <div
+        id="mainContainer"
+        className="mx-auto flex h-full min-h-0 w-full max-w-7xl flex-col gap-3 overflow-hidden lg:flex-row lg:gap-4"
+      >
+        <section
+          id="chatContainer"
+          className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-[var(--border-soft)] bg-[var(--surface)] shadow-xl shadow-black/10"
+        >
+          <header className="shrink-0 border-b border-[var(--border-soft)] px-4 py-3 sm:px-5">
+            <p className="text-center text-lg font-semibold text-[var(--text)] sm:text-xl">
+              {opponentName || "Debate"}
             </p>
-          </div>
+          </header>
 
-          <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3 min-h-0">
+          <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-4 py-4 sm:px-5">
             <div className="flex-1" />
+
             {messages.map((msg) =>
               msg.role === "opponent" ? (
-                /* Opponent messages — left aligned */
                 <div
                   key={msg.id}
-                  className="flex items-start gap-2 max-w-[80%]"
+                  className="flex max-w-[88%] items-start gap-2 sm:max-w-[78%]"
                 >
-                  <div className="w-15 h-15 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
-                    {<User color="var(--text)" size={30}/>}
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[var(--border-soft)] bg-[var(--surface-soft)]">
+                    <User color="var(--icon)" size={20} />
                   </div>
-                  <div className="bg-gray-100 rounded-tl-sm rounded-tr-xl rounded-br-xl rounded-bl-xl px-3 py-2 text-sm text-gray-800 leading-relaxed">
+                  <div className="rounded-lg rounded-tl-sm bg-[var(--surface-soft)] px-3 py-2 text-sm leading-relaxed text-[var(--text)]">
                     {msg.text}
                   </div>
                 </div>
               ) : (
-                /* User message — right aligned */
                 <div key={msg.id} className="flex justify-end">
-                  <div className="bg-gray-700 text-white rounded-tl-xl rounded-tr-sm rounded-br-xl rounded-bl-xl px-3 py-2 text-sm max-w-[75%] leading-relaxed">
+                  <div className="max-w-[88%] rounded-lg rounded-tr-sm bg-[var(--accent)] px-3 py-2 text-sm leading-relaxed text-[var(--text-alt)] sm:max-w-[74%]">
                     {msg.text}
                   </div>
                 </div>
               ),
             )}
+
             {isLoading && (
-              <div className="flex items-start gap-2 max-w-[80%]">
-                <div className="w-15 h-15 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
-                  {<User color="var(--text)" size={30}/>}
+              <div className="flex max-w-[88%] items-start gap-2 sm:max-w-[78%]">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[var(--border-soft)] bg-[var(--surface-soft)]">
+                  <User color="var(--icon)" size={20} />
                 </div>
-                <div className="bg-gray-100 rounded-tl-sm rounded-tr-xl rounded-br-xl rounded-bl-xl px-4 py-3 flex gap-1 items-center">
-                  <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce animation-delay-none" />
-                  <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce animation-delay-150ms" />
-                  <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce animation-delay-300ms" />
+                <div className="flex items-center gap-1 rounded-lg rounded-tl-sm bg-[var(--surface-soft)] px-4 py-3">
+                  <span className="h-2 w-2 animate-bounce rounded-full bg-[var(--muted)] animation-delay-none" />
+                  <span className="h-2 w-2 animate-bounce rounded-full bg-[var(--muted)] animation-delay-150ms" />
+                  <span className="h-2 w-2 animate-bounce rounded-full bg-[var(--muted)] animation-delay-300ms" />
                 </div>
               </div>
             )}
-            {/*Used for the scrolling chat */}
+
             <div ref={bottomRef} />
           </div>
-          {/*Chat input and Button */}
-          <div
-            className="flex sticky bottom-0 px-4 py-3 border-t border-gray-200 gap-2 z-10 shrink-0"
-            style={{ backgroundColor: "#f9f8f6" }}
-          >
-            <input
-              className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-400"
-              placeholder="Type here"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+
+          <footer className="shrink-0 border-t border-[var(--border-soft)] bg-[var(--surface)] px-3 py-3 sm:px-4">
+            <div className="flex items-center gap-2 rounded-lg border border-[var(--border-soft)] bg-[var(--bg)] px-2 py-2">
+              <input
+                className="min-w-0 flex-1 bg-transparent px-2 py-1 text-sm text-[var(--text)] outline-none placeholder:text-[var(--muted)]"
+                placeholder="Type here"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+              />
+              <button
+                onClick={toggleListening}
+                title={isListening ? "Stop listening" : "Start listening"}
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-[var(--muted)] transition hover:bg-[var(--surface-soft)] hover:text-[var(--text)]"
+                type="button"
+              >
+                {isListening ? (
+                  <MicOff color="red" size={19} />
+                ) : (
+                  <Mic size={19} />
+                )}
+              </button>
+              <button
+                onClick={sendMessage}
+                disabled={!input.trim() || isLoading}
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-[var(--accent)] text-[var(--text-alt)] transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-45"
+                title="Send"
+                type="button"
+              >
+                <Send size={18} />
+              </button>
+            </div>
+          </footer>
+        </section>
+
+        <aside className="min-h-[220px] shrink-0 overflow-hidden rounded-lg border border-[var(--border-soft)] bg-black lg:h-full lg:w-[36%] lg:max-w-[460px] xl:w-[34%]">
+          <div className="mx-auto h-full w-full max-w-[430px]">
+            <PoliticianStage
+              opponentName={opponentName || resolvedId || "trump"}
+              imageUrl={opponentImage}
+              videoUrl={videoUrl}
+              audioBase64={audioB64}
             />
-            {/*The microphone input for the user text box */}
-            <button
-              onClick={toggleListening}
-              title={isListening ? "Stop listening" : "Start listening"}
-              className="text-xl px-2"
-              style={{
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                color: isListening ? "red" : "gray",
-              }}
-            >
-              {isListening ? <MicOff size={20} /> : <Mic size={20} />}
-            </button>
-            {/*sends message to the backend and adds it to the chat */}
-            <button
-              onClick={sendMessage}
-              className="bg-gray-700 text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-800 transition shrink-0"
-            >
-              Send
-            </button>
           </div>
-        </div>
-        {/* right aligned stage: picks per-character frames from opponentName,
-            shows lip-sync video, else mouth-flap, else still */}
-        <div className="flex-1 h-full bg-black">
-          <PoliticianStage
-            opponentName={opponentName || resolvedId || "trump"}
-            imageUrl={opponentImage}
-            videoUrl={videoUrl}
-            audioBase64={audioB64}
-          />
-        </div>
+        </aside>
       </div>
     </main>
   );
