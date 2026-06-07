@@ -1,21 +1,7 @@
-INFO:     Will watch for changes in these directories: ['/Users/jacksmithson/Downloads/Smoke and Mirrors Project']
-INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
-INFO:     Started reloader process [24320] using WatchFiles
-INFO:     Started server process [24333]
+INFO:     Will watch for changes in these directories: ['C:\\Users\\kiday\\Documents\\DebateMe']
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [2764] using WatchFiles
+INFO:     Started server process [23748]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
-INFO:     192.107.171.33:0 - "OPTIONS /debate HTTP/1.1" 200 OK
-INFO:     192.107.171.33:0 - "POST /debate HTTP/1.1" 200 OK
-INFO:     192.107.171.33:0 - "POST /debate HTTP/1.1" 200 OK
-INFO:     192.107.171.33:0 - "POST /debate HTTP/1.1" 200 OK
-INFO:     192.107.171.33:0 - "OPTIONS /debate HTTP/1.1" 200 OK
-INFO:     192.107.171.33:0 - "POST /debate HTTP/1.1" 200 OK
-INFO:     192.107.171.33:0 - "POST /debate HTTP/1.1" 200 OK
-INFO:     192.107.171.33:0 - "POST /debate HTTP/1.1" 200 OK
-INFO:     192.107.171.33:0 - "OPTIONS /debate HTTP/1.1" 200 OK
-INFO:     192.107.171.33:0 - "POST /debate HTTP/1.1" 200 OK
-INFO:     Shutting down
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-INFO:     Finished server process [24333]
-INFO:     Stopping reloader process [24320]
+INFO:     127.0.0.1:49251 - "POST /debate HTTP/1.1" 200 OK
