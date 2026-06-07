@@ -23,6 +23,7 @@
 # python / deploy
 /.venv
 /.logs
+/deploy2.sh
 tweet_cache.json
 web_cache.json
 __pycache__/

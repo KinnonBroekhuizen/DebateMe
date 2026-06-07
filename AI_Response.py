@@ -85,7 +85,11 @@ def debate(req: AskRequest):
     """
     reply = askAI(req.question, req.character, req.history)
 
-    audio = tts.synthesize(reply)
+    # askAI already validated the character, so this resolves to a real key;
+    # the slug drives per-character voice (tts) and base video (lipsync).
+    character_slug = CHARACTER_SLUGS.get(resolve_character(req.character) or "")
+
+    audio = tts.synthesize(reply, character_slug)
     audio_b64 = base64.b64encode(audio).decode("ascii") if audio else None
 
     video_url = None
@@ -93,7 +97,7 @@ def debate(req: AskRequest):
         # Sync.so fetches the audio by URL, so host it on Cloudinary first.
         # No Cloudinary keys → no public URL → no video (mouth-flap fallback).
         audio_url = cloudinary_upload.upload_audio(audio)
-        video_url = lipsync.generate(audio_url)
+        video_url = lipsync.generate(audio_url, character_slug)
 
     return {
         "reply": reply,
@@ -111,6 +115,66 @@ def debate(req: AskRequest):
 # persona prompts means long histories cause persona drift and slower replies,
 # so we keep a sliding window of the most recent exchanges (~4 back-and-forths).
 MAX_HISTORY_TURNS = 8
+
+
+# canonical prompt key -> short slug used for per-character assets: Fish voices
+# (REFERENCE_ID_<SLUG>), Sync base videos (BASE_VIDEO_URL_<SLUG>), and the
+# /public/<slug>/ mouth-flap frames on the frontend.
+CHARACTER_SLUGS = {
+    "donald trump": "trump",
+    "christopher luxon": "luxon",
+    "chris hipkins": "hipkins",
+}
+
+# opponent_name is free-form user input from Supabase, so match it loosely the
+# same way the frontend's resolveFrames does — a substring hit on a known
+# surname/nickname wins. Keeps "Hipkin", "Chris Hipkins MP", "Chris Luxon", or
+# "@trump" from hard-failing the way exact-key matching did.
+_SURNAME_TO_KEY = {
+    "trump": "donald trump",
+    "luxon": "christopher luxon",
+    "hipkin": "chris hipkins",  # also matches "hipkins"
+    "chippy": "chris hipkins",
+}
+
+
+def resolve_character(character: str) -> str | None:
+    """Map a free-form opponent name to a canonical prompt key, or None."""
+    name = character.strip().lstrip("@").lower()
+    return next(
+        (key for token, key in _SURNAME_TO_KEY.items() if token in name),
+        None,
+    )
+
+
+# trivial conversational filler — greetings, thanks, acknowledgements. these
+# don't assert events and don't need fresh web context. worse: searching "hi"
+# returns dictionary/encyclopedia junk ("Hi is a casual greeting... appropriate
+# for most workplace interactions") that the small model parrots in helpful-
+# assistant voice, breaking character entirely. so we detect filler and skip
+# both the web search AND the INTEL wrapper, letting the persona prompt + a
+# greeting few-shot carry the reply.
+_SMALLTALK = {
+    "hi", "hii", "hiya", "hey", "heya", "hello", "helo", "yo", "sup",
+    "wassup", "whatsup", "howdy", "gday", "g day", "kia ora", "hola",
+    "hi there", "hey there", "hello there",
+    "good morning", "good afternoon", "good evening", "morning", "evening",
+    "how are you", "how are ya", "how r u", "how you doing", "how are you doing",
+    "hows it going", "how is it going", "what's up", "whats up",
+    "you good", "you alright", "you ok",
+    "thanks", "thank you", "thx", "ta", "cheers", "ok", "okay", "k", "cool",
+    "nice", "lol", "haha", "lmao", "bye", "goodbye", "see ya", "cya",
+    "good", "great", "test", "testing",
+}
+
+
+def _is_smalltalk(question: str) -> bool:
+    """True for greetings / filler that shouldn't trigger web search."""
+    normalized = "".join(
+        c for c in question.strip().lower() if c.isalnum() or c.isspace()
+    )
+    normalized = " ".join(normalized.split())
+    return normalized in _SMALLTALK
 
 
 def askAI(question: str, character: str, history: list[Turn] | None = None) -> str:
@@ -257,13 +321,13 @@ You are Christopher Luxon, Prime Minister of New Zealand and leader of the Natio
 === HOW LUXON ACTUALLY TALKS ===
 
 SENTENCE STRUCTURE:
-- Start a LOT of sentences with "Look,", "Candidly,", "Frankly,", "Actually,", or "What I'd say is..."
+- Start a LOT of sentences with "Look,", "Frankly,", "Actually,", or "What I'd say is..."
 - Use corporate management jargon constantly — even when it doesn't fit
 - Pivot mid-sentence to a talking point: "...and what we're really focused on is delivery for New Zealanders"
 - Rapid, slightly clipped delivery. Not warm. Efficient.
 
 VERBAL TICS (use these CONSTANTLY):
-- "Look," / "Candidly," / "Frankly," / "Actually," to start sentences
+- "Look," / "Frankly," / "Actually," to start sentences
 - "What I'd say is..." / "What I'd actually say is..."
 - "Let's be clear..." / "Let me be very clear..."
 - "We are absolutely focused on..."
@@ -303,7 +367,7 @@ DEFENSIVE TOPICS (deflect with talking points, do NOT engage):
 - Polls dropping → "polls go up, polls go down, we're focused on delivery"
 
 ANSWER SHAPE (READ THIS TWICE):
-- FIRST SENTENCE: actually answer the question, often starting with "Look," or "Candidly,". No warm-up.
+- FIRST SENTENCE: actually answer the question. No warm-up.
 - THEN 1-2 short sentences pivoting to a National Party talking point ("delivery", "back on track", "previous government").
 - TOTAL: 2-3 sentences, ~40-55 words. Hard ceiling.
 - Drop at least one piece of corporate jargon per answer.
@@ -326,7 +390,7 @@ BEFORE answering ANY question that asserts an event, ask yourself:
 
 How Luxon pushes back on fake premises:
 - "Look, I'd actually push back on the premise of that question — I haven't seen anything about that, and I'd want to check the facts before commenting."
-- "Candidly, that's not something I'm aware of. What I'd say is, you shouldn't believe everything you hear — let's stick to the facts."
+- "That's not something I'm aware of. What I'd say is, you shouldn't believe everything you hear — let's stick to the facts."
 - "Hold on — that's news to me, and frankly I don't think that's accurate. We're focused on delivery for hard-working Kiwis, not chasing rumours."
 
 NEVER agree, validate, or build a "delivery for Kiwis" answer on top of a claim you can't verify. Challenge the premise first, THEN pivot to a talking point if you want.
@@ -337,7 +401,7 @@ Q: How are you handling the cost of living crisis?
 A: Look, we inherited a mess from the previous Labour government. We're delivering tax relief for hard-working New Zealanders right now, putting more money in Kiwi pockets. We're laser focused on rebuilding the economy and getting New Zealand back on track.
 
 Q: Why do you own seven houses?
-A: Candidly, what New Zealanders care about is delivery, not my personal situation. We're focused on building more houses, fixing the housing market Labour broke, and giving Kiwi families a fair go. That's the work.
+A: What New Zealanders care about is delivery, not my personal situation. We're focused on building more houses, fixing the housing market Labour broke, and giving Kiwi families a fair go. That's the work.
 
 Q: David Seymour said something controversial again. Your response?
 A: Look, we have robust discussions inside the coalition — that's healthy. At the end of the day we deliver as one team for New Zealanders, and we're absolutely focused on the outcomes that matter. Back on track.
@@ -348,7 +412,7 @@ A: Honestly? A good roast. Nothing fancy. What I'd say is, Kiwis appreciate simp
 === GUARDRAIL HANDLING ===
 If asked something you can't answer, deflect IN CHARACTER:
 - "Look, I'm not going to get into that — what I'd say is we're focused on delivery for New Zealanders."
-- "Candidly, that's a matter for [insert minister]. Our focus is execution."
+- That's a matter for [insert minister]. Our focus is execution."
 - "What I'd actually say is, the real issue Kiwis care about is the cost of living — and we're delivering on that."
 
 === ABSOLUTE RULES ===
@@ -475,16 +539,7 @@ You are committed to the bit. You are PLAIN-SPOKEN. You are SCRAPPY. You are CHI
 """,
     }
 
-    # short ids from the opponents page ("Trump") map to a full prompt name
-    aliases = {
-        "trump": "donald trump",
-        "luxon": "christopher luxon",
-        "chris luxon": "christopher luxon",
-        "hipkins": "chris hipkins",
-        "chippy": "chris hipkins",
-    }
-    key = character.strip().lstrip("@").lower()
-    key = aliases.get(key, key)
+    key = resolve_character(character)
     if key not in system_prompts:
         raise HTTPException(
             status_code=400,
@@ -493,8 +548,11 @@ You are committed to the bit. You are PLAIN-SPOKEN. You are SCRAPPY. You are CHI
     system_prompt = system_prompts[key]
 
     # pull fresh web context so answers can reference real, recent events
-    # instead of relying on the model's stale training data
-    web_context = search_web_cached(question)
+    # instead of relying on the model's stale training data. skip it for
+    # greetings/filler — searching "hi" only returns dictionary junk the model
+    # parrots instead of staying in character.
+    is_smalltalk = _is_smalltalk(question)
+    web_context = "" if is_smalltalk else search_web_cached(question)
 
     # per-character few-shot examples. these become user/assistant turns in
     # the chat history below to tone-set the model. character-specific so
@@ -502,6 +560,12 @@ You are committed to the bit. You are PLAIN-SPOKEN. You are SCRAPPY. You are CHI
     # leaking through.
     few_shots = {
         "donald trump": [
+            (
+                "Hi",
+                "Hello, hello. Great to be here, tremendous crowd. So — what "
+                "do you want to know? Ask me anything. Nobody gives better "
+                "answers, believe me.",
+            ),
             (
                 "INTEL: Polls show 53% of Americans support continued "
                 "Ukraine aid, up 5 points from last quarter.\n\n"
@@ -527,6 +591,12 @@ You are committed to the bit. You are PLAIN-SPOKEN. You are SCRAPPY. You are CHI
         ],
         "christopher luxon": [
             (
+                "Hi",
+                "Gidday. Look, good to chat. Fire away — I'm always happy to "
+                "talk about what we're delivering for hard-working Kiwis. "
+                "Back on track.",
+            ),
+            (
                 "INTEL: Latest poll shows National down 4 points, Labour "
                 "gaining ground on cost of living.\n\n"
                 "Question: Are New Zealanders losing faith in your government?",
@@ -551,6 +621,12 @@ You are committed to the bit. You are PLAIN-SPOKEN. You are SCRAPPY. You are CHI
             ),
         ],
         "chris hipkins": [
+            (
+                "Hi",
+                "Ah, gidday. Good to see ya. Look, what's on your mind? Happy "
+                "to talk about the bread and butter stuff that actually "
+                "matters to ordinary Kiwis.",
+            ),
             (
                 "INTEL: National's tax relief package delivered an average "
                 "$25/week to middle-income earners, but $250/week to "
@@ -586,15 +662,21 @@ You are committed to the bit. You are PLAIN-SPOKEN. You are SCRAPPY. You are CHI
     # Empty intel is ALSO a signal — if the question asserts an event
     # ("now that X has happened") and the web returns nothing, that's the
     # cue to push back on the premise instead of playing along.
-    intel_body = web_context if web_context else "No results found relating to this event."
-    user_content = (
-        f"INTEL (background only — DO NOT quote, summarise, or agree with "
-        f"this. Use it as raw material, then answer AS {intel_label} "
-        f"through YOUR worldview. If INTEL says 'No results found' AND the "
-        f"question asserts an event happened, the premise is likely FAKE — "
-        f"push back in character, do NOT play along):\n{intel_body}\n\n"
-        f"Question: {question}"
-    )
+    if is_smalltalk:
+        # greeting/filler: no INTEL wrapper at all. the event/false-premise
+        # framing is nonsensical for "hi" and just nudges the model toward
+        # meta-commentary. let the persona prompt + greeting few-shot answer it.
+        user_content = question
+    else:
+        intel_body = web_context if web_context else "No results found relating to this event."
+        user_content = (
+            f"INTEL (background only — DO NOT quote, summarise, or agree with "
+            f"this. Use it as raw material, then answer AS {intel_label} "
+            f"through YOUR worldview. If INTEL says 'No results found' AND the "
+            f"question asserts an event happened, the premise is likely FAKE — "
+            f"push back in character, do NOT play along):\n{intel_body}\n\n"
+            f"Question: {question}"
+        )
 
     # flatten the character's few-shot pairs into chat turns
     shot_messages = []
@@ -632,10 +714,8 @@ You are committed to the bit. You are PLAIN-SPOKEN. You are SCRAPPY. You are CHI
             "top_p": 0.9,
             "top_k": 40,
             "repeat_penalty": 1.1,
-            # ~90 tokens ≈ 65 words ≈ 2-3 sentences. tight by design - the
-            # stop-on-blank-line catches multi-paragraph rambling and this
-            # cap catches single-paragraph rambling.
-            "num_predict": 90,
+            # no hard token cap - let the model finish its thought. the
+            # stop-on-blank-line below still catches multi-paragraph rambling.
             # the model loves to start a new paragraph and ramble again - kill
             # that instinct by stopping on the first blank line.
             "stop": ["\n\n"],

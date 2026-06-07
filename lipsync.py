@@ -21,13 +21,35 @@ MAX_POLLS = 40  # ~4 min ceiling
 
 
 def lipsync_enabled() -> bool:
-    """True when Sync.so is configured (API key + base video present)."""
+    """True when Sync.so is configured (API key + at least one base video)."""
     return bool(os.getenv("SYNC_API_KEY") and os.getenv("TRUMP_BASE_VIDEO_URL"))
 
 
-def generate(audio_url: str | None) -> str | None:
-    """Lip-sync the base video to `audio_url`. None if unavailable/failed."""
-    if not audio_url or not lipsync_enabled():
+def _base_video_for(character: str | None) -> str | None:
+    """Base talking-head video URL for a character slug (trump/luxon/hipkins).
+
+    Per-character `BASE_VIDEO_URL_<SLUG>` so each politician lip-syncs onto
+    their own face. Trump keeps the legacy `TRUMP_BASE_VIDEO_URL` name. A
+    character with no configured video returns None — the frontend then falls
+    back to the mouth-flap instead of showing the wrong politician's face.
+    """
+    if not character:
+        return os.getenv("TRUMP_BASE_VIDEO_URL")
+    specific = os.getenv(f"BASE_VIDEO_URL_{character.upper()}")
+    if specific:
+        return specific
+    if character == "trump":
+        return os.getenv("TRUMP_BASE_VIDEO_URL")  # back-compat var name
+    return None
+
+
+def generate(audio_url: str | None, character: str | None = None) -> str | None:
+    """Lip-sync `character`'s base video to `audio_url`. None if unavailable."""
+    if not audio_url or not os.getenv("SYNC_API_KEY"):
+        return None
+
+    base_video_url = _base_video_for(character)
+    if not base_video_url:
         return None
 
     try:
@@ -41,7 +63,6 @@ def generate(audio_url: str | None) -> str | None:
         base_url="https://api.sync.so",
         api_key=os.environ["SYNC_API_KEY"],
     ).generations
-    base_video_url = os.environ["TRUMP_BASE_VIDEO_URL"]
 
     try:
         response = client.create(

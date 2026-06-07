@@ -4,6 +4,7 @@ import { supabase } from "@/lib/supabase";
 import { useParams } from "next/navigation";
 import { useSpeechInput } from "./useSpeechInput";
 import PoliticianStage from "@/app/components/trump-stage/PoliticianStage";
+import { unlockAudio } from "@/app/components/trump-stage/audioContext";
 import { Mic, MicOff, User } from "react-feather";
 
 //message object, belongs to either an ooponent or the user
@@ -20,7 +21,10 @@ type DebateResponse = {
   videoUrl: string | null;
 };
 
-const BACKEND_URL = "http://localhost:8000";
+// defaults to the local backend, but deploy2.sh overrides this with the
+// backend's Cloudflare tunnel URL so remote browsers can reach it too.
+const BACKEND_URL =
+  process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:8000";
 
 export default function Chat() {
   const { id } = useParams(); //gets the opponent ID from the page
@@ -32,6 +36,7 @@ export default function Chat() {
     toggleListening,
   } = useSpeechInput();
   const [opponentName, setOpponentName] = useState<string>(""); //gets opponent name from the database and ID
+  const [opponentImage, setOpponentImage] = useState<string | null>(null); //static profile image, used when the opponent has no animated frames
   //fetches opponent information and starting layout from the database
   useEffect(() => {
     const fetchData = async () => {
@@ -41,7 +46,10 @@ export default function Chat() {
         .eq("id", resolvedId)
         .maybeSingle();
       if (error) console.error(error);
-      if (data) setOpponentName(data.opponent_name);
+      if (data) {
+        setOpponentName(data.opponent_name);
+        setOpponentImage(data.image_link ?? null);
+      }
     };
     fetchData();
   }, [resolvedId]);
@@ -61,6 +69,10 @@ export default function Chat() {
   //sends user input to backend
   const sendMessage = async () => {
     if (!input.trim()) return;
+    // Unlock audio *now*, while the click gesture is still active. The /debate
+    // call is slow, so this is the only moment the browser will let us start
+    // playback later without a manual "Replay" tap.
+    unlockAudio();
     const currentInput = input;
     const userMsg: Message = {
       id: crypto.randomUUID(),
@@ -112,20 +124,20 @@ export default function Chat() {
   };
 
   return (
-    <main>
-      <div id="mainContainer" className="flex h-screen-200">
+    <main className="flex-1 min-h-0 flex">
+      {/* Fill the space the navbar leaves: the stage and chat panel take the
+          full remaining height, and the chat panel is a flex column so its
+          message list flexes between the header and the input bar. */}
+      <div id="mainContainer" className="flex flex-1 min-h-0">
         {/* Chat panel is left aligned */}
-        <div id="chatContainer" className="flex-1 overflow-hidden">
+        <div id="chatContainer" className="flex-1 flex flex-col overflow-hidden">
           <div className="px-4 py-3 border-b border-gray-200 shrink-0">
             <p className="font-bold text-xl text-center">
               {opponentName}
             </p>
           </div>
 
-          <div
-            className="overflow-y-auto px-4 py-4 flex flex-col gap-3 min-h-0"
-            style={{ height: "calc(100vh - 200px)" }}
-          >
+          <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3 min-h-0">
             <div className="flex-1" />
             {messages.map((msg) =>
               msg.role === "opponent" ? (
@@ -200,9 +212,15 @@ export default function Chat() {
             </button>
           </div>
         </div>
-        {/*right aligned Trump stage: lip-sync video, else mouth-flap, else still */}
-        <div className="flex-1 bg-black">
-          <TrumpStage videoUrl={videoUrl} audioBase64={audioB64} />
+        {/* right aligned stage: picks per-character frames from opponentName,
+            shows lip-sync video, else mouth-flap, else still */}
+        <div className="flex-1 h-full bg-black">
+          <PoliticianStage
+            opponentName={opponentName || resolvedId || "trump"}
+            imageUrl={opponentImage}
+            videoUrl={videoUrl}
+            audioBase64={audioB64}
+          />
         </div>
       </div>
     </main>

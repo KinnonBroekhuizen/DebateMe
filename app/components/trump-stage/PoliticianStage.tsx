@@ -1,9 +1,11 @@
 "use client";
-import { useMouthFlap } from "./useMouthFlap";
+import { useMouthFlap, type MouthFrame } from "./useMouthFlap";
 
 // ── Add new politicians here ──────────────────────────────────────────────────
-// Keys must match the opponent_name stored in Supabase (case-insensitive)
-// Add the 4 frame images to /public/<politician>/ folder
+// Only list politicians that actually have the 4 frame images shipped in
+// /public/<politician>/. Anyone NOT listed here falls back to their static
+// Supabase image_link (see PoliticianStage below) instead of a broken image.
+// Keys are matched loosely against opponent_name (substring, case-insensitive).
 const POLITICIAN_FRAMES: Record<string, {
   closed: string;
   slight: string;
@@ -11,52 +13,58 @@ const POLITICIAN_FRAMES: Record<string, {
   open:   string;
 }> = {
   trump: {
-    closed: "/trump/mouth-closed.png",
-    slight: "/trump/mouth-slight.png",
-    half:   "/trump/mouth-half.png",
-    open:   "/trump/mouth-open.png",
+    closed: "/trump/mouth-closed.webp",
+    slight: "/trump/mouth-slight.webp",
+    half:   "/trump/mouth-half.webp",
+    open:   "/trump/mouth-open.webp",
   },
   hipkins: {
-    closed: "/hipkins/mouth-closed.png",
-    slight: "/hipkins/mouth-slight.png",
-    half:   "/hipkins/mouth-half.png",
-    open:   "/hipkins/mouth-open.png",
-  },
-  luxon: {
-    closed: "/luxon/mouth-closed.png",
-    slight: "/luxon/mouth-slight.png",
-    half:   "/luxon/mouth-half.png",
-    open:   "/luxon/mouth-open.png",
+    closed: "/hipkins/mouth-closed.webp",
+    slight: "/hipkins/mouth-slight.webp",
+    half:   "/hipkins/mouth-half.webp",
+    open:   "/hipkins/mouth-open.webp",
   },
 };
 
-// Fallback if politician not found
-const DEFAULT_FRAMES = POLITICIAN_FRAMES.trump;
+type Frames = (typeof POLITICIAN_FRAMES)[string];
+
+// opponent_name is free-form user input, so match loosely (substring) the same
+// way the backend's askAI aliases do — "Donald Trump", "Trump", "@trump" all
+// resolve to the trump frames, "Chris Hipkins"/"Chippy" to hipkins, etc.
+// Returns null when no shipped frame set matches, so the caller can fall back
+// to the opponent's static image instead of showing the wrong politician.
+function resolveFrames(opponentName: string): Frames | null {
+  const name = opponentName.toLowerCase().trim().replace(/^@/, "");
+  const match = Object.keys(POLITICIAN_FRAMES).find((k) => name.includes(k));
+  if (match) return POLITICIAN_FRAMES[match];
+  if (name.includes("chippy")) return POLITICIAN_FRAMES.hipkins;
+  return null;
+}
 
 interface PoliticianStageProps {
-  /** The opponent name from Supabase — used to pick the right images */
+  /** The opponent name from Supabase — used to pick the right frame set */
   opponentName: string;
+  /** Static profile image (Supabase image_link). Fallback when this opponent
+   *  has no animated frame set so we never render a broken image. */
+  imageUrl?: string | null;
   /** Finished lip-sync video (Sync.so). Highest fidelity when present. */
   videoUrl?: string | null;
   /** base64 MP3 from the pipeline. Drives the mouth-flap fallback. */
   audioBase64?: string | null;
 }
 
-export default function PoliticianStage({ opponentName, videoUrl, audioBase64 }: PoliticianStageProps) {
-  const { mouthOpen, mouthLevel, playing, play } = useMouthFlap(audioBase64);
+export default function PoliticianStage({
+  opponentName,
+  imageUrl,
+  videoUrl,
+  audioBase64,
+}: PoliticianStageProps) {
+  const { frame, playing, play } = useMouthFlap(audioBase64);
 
-  // Match opponent name to frames — lowercase, trim whitespace
-  const key = opponentName.toLowerCase().trim();
-  const frames = POLITICIAN_FRAMES[key] ?? DEFAULT_FRAMES;
+  // null when this opponent has no shipped frame set (e.g. Luxon, custom adds)
+  const frames = resolveFrames(opponentName);
 
-  // Pick the right frame based on mouth level (0-3)
-  function getFrame(): string {
-    if (!mouthOpen) return frames.closed;
-    if (mouthLevel < 0.4) return frames.slight;
-    if (mouthLevel < 0.75) return frames.half;
-    return frames.open;
-  }
-
+  // Highest fidelity: real lip-sync video.
   if (videoUrl) {
     return (
       <video
@@ -69,15 +77,58 @@ export default function PoliticianStage({ opponentName, videoUrl, audioBase64 }:
     );
   }
 
+  // No animated frames for this opponent → show their static image so the
+  // stage isn't empty/broken. Audio (if any) still plays via the Replay button.
+  if (!frames) {
+    return (
+      <div className="relative w-full h-full flex items-center justify-center">
+        {imageUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            alt={opponentName}
+            src={imageUrl}
+            className="w-full h-full object-contain select-none"
+            draggable={false}
+          />
+        ) : (
+          <span className="text-white/60 text-2xl font-semibold">
+            {opponentName || "Opponent"}
+          </span>
+        )}
+        {audioBase64 && !playing && (
+          <button
+            onClick={play}
+            className="absolute bottom-4 right-4 bg-white/90 text-black text-sm font-semibold px-4 py-2 rounded-lg shadow hover:bg-white transition"
+          >
+            ▶ Replay
+          </button>
+        )}
+      </div>
+    );
+  }
+
+  // Render all 4 frames stacked and just toggle which one is visible. Every
+  // frame is in the DOM from the start, so the browser fetches + decodes each
+  // PNG ONCE up front; switching mouth positions is then a compositor-only
+  // opacity flip — no mid-animation fetch/decode, which is what made the
+  // old src-swapping approach stutter.
+  const FRAME_ORDER: MouthFrame[] = ["closed", "slight", "half", "open"];
+
   return (
     <div className="relative w-full h-full flex items-center justify-center">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        alt={opponentName}
-        src={getFrame()}
-        className="w-full h-full object-contain select-none"
-        draggable={false}
-      />
+      {FRAME_ORDER.map((f) => (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          key={f}
+          alt={opponentName}
+          src={frames[f]}
+          aria-hidden={f !== frame}
+          className={`absolute inset-0 w-full h-full object-contain select-none ${
+            f === frame ? "opacity-100" : "opacity-0"
+          }`}
+          draggable={false}
+        />
+      ))}
       {audioBase64 && !playing && (
         <button
           onClick={play}
