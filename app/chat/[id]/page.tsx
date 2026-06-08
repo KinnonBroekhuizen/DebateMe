@@ -7,37 +7,38 @@ import PoliticianStage from "@/app/components/trump-stage/PoliticianStage";
 import { unlockAudio } from "@/app/components/trump-stage/audioContext";
 import { Mic, MicOff, User } from "react-feather";
 
-//message object, belongs to either an ooponent or the user
 type Message = {
   id: string;
   role: "opponent" | "user";
   text: string;
 };
 
-//The objects the backend sends back to be displayed/outputted to user
 type DebateResponse = {
   reply: string;
   audio: string | null;
   videoUrl: string | null;
 };
 
-// defaults to the local backend, but deploy2.sh overrides this with the
-// backend's Cloudflare tunnel URL so remote browsers can reach it too.
 const BACKEND_URL =
   process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:8000";
 
 export default function Chat() {
-  const { id } = useParams(); //gets the opponent ID from the page
-  const resolvedId = Array.isArray(id) ? id[0] : id; //first page param as the ID
+  const { id } = useParams();
+  const resolvedId = Array.isArray(id) ? id[0] : id;
   const {
     text: input,
     setText: setInput,
     isListening,
     toggleListening,
   } = useSpeechInput();
-  const [opponentName, setOpponentName] = useState<string>(""); //gets opponent name from the database and ID
-  const [opponentImage, setOpponentImage] = useState<string | null>(null); //static profile image, used when the opponent has no animated frames
-  //fetches opponent information and starting layout from the database
+  const [opponentName, setOpponentName] = useState<string>("");
+  const [opponentImage, setOpponentImage] = useState<string | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [audioB64, setAudioB64] = useState<string | null>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     const fetchData = async () => {
       const { data, error } = await supabase
@@ -45,6 +46,7 @@ export default function Chat() {
         .select("*")
         .eq("id", resolvedId)
         .maybeSingle();
+
       if (error) console.error(error);
       if (data) {
         setOpponentName(data.opponent_name);
@@ -54,41 +56,38 @@ export default function Chat() {
     fetchData();
   }, [resolvedId]);
 
-  const [messages, setMessages] = useState<Message[]>([]);
-  //const [input, setInput] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  // latest media from the pipeline — fed to the Trump stage on the right
-  const [videoUrl, setVideoUrl] = useState<string | null>(null);
-  const [audioB64, setAudioB64] = useState<string | null>(null);
-  const bottomRef = useRef<HTMLDivElement>(null);
-
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, isLoading]);
 
-  //sends user input to backend
+  const visibleMessages: Message[] =
+    messages.length > 0
+      ? messages
+      : [
+          {
+            id: "welcome",
+            role: "opponent",
+            text: "Let's debate! Send a message to start the conversation.",
+          },
+        ];
+
   const sendMessage = async () => {
-    if (!input.trim()) return;
-    // Unlock audio *now*, while the click gesture is still active. The /debate
-    // call is slow, so this is the only moment the browser will let us start
-    // playback later without a manual "Replay" tap.
+    if (!input.trim() || isLoading) return;
+
     unlockAudio();
-    const currentInput = input;
+    const currentInput = input.trim();
     const userMsg: Message = {
       id: crypto.randomUUID(),
       role: "user",
       text: currentInput,
     };
-    setMessages((prev) => [...prev, userMsg]); //adds message to the chat messages
-    setInput("");
-    setIsLoading(true);
-    // prior turns (oldest-first) become the opponent's memory of the chat.
-    // `messages` here is the snapshot BEFORE this question, which is exactly
-    // the history we want — the current question rides in `question`.
     const history = messages.map((m) => ({ role: m.role, text: m.text }));
 
+    setMessages((prev) => [...prev, userMsg]);
+    setInput("");
+    setIsLoading(true);
+
     try {
-      //question -> AI -> audio -> lip-sync video, all in one call
       const res = await fetch(`${BACKEND_URL}/debate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -101,12 +100,10 @@ export default function Chat() {
       if (!res.ok) throw new Error(`backend ${res.status}`);
       const answer: DebateResponse = await res.json();
 
-      //adds the response to the chat messages
       setMessages((prev) => [
         ...prev,
         { id: crypto.randomUUID(), role: "opponent", text: answer.reply },
       ]);
-      // drive the stage: real video if we have it, else mouth-flap audio
       setVideoUrl(answer.videoUrl);
       setAudioB64(answer.audio);
     } catch {
@@ -119,109 +116,127 @@ export default function Chat() {
         },
       ]);
     } finally {
-      setIsLoading(false); // hide loading bubble
+      setIsLoading(false);
     }
   };
 
   return (
-    <main className="flex-1 min-h-0 flex">
-      {/* Fill the space the navbar leaves: the stage and chat panel take the
-          full remaining height, and the chat panel is a flex column so its
-          message list flexes between the header and the input bar. */}
-      <div id="mainContainer" className="flex flex-1 min-h-0">
-        {/* Chat panel is left aligned */}
-        <div id="chatContainer" className="flex-1 flex flex-col overflow-hidden">
-          <div className="px-4 py-3 border-b border-gray-200 shrink-0">
-            <p className="font-bold text-xl text-center">
-              {opponentName}
+    <main className="flex h-[calc(100dvh-73px)]  bg-[var(--bg)] p-2 text-[var(--text)] sm:p-3 lg:overflow-hidden sm:overflow-auto ">
+      {/* Main Container */}
+      <div
+        id="mainContainer"
+        className="flex h-full w-full flex-col gap-3 min-h-0 lg:flex-row "
+      >
+        {/* Chat Panel */}
+        <section
+          id="chatContainer"
+          className="flex flex-1 min-h-200 flex-col overflow-hidden rounded-2xl bg-[var(--surface)] shadow-2xl shadow-black/25"
+        >
+          {/* Chat Header */}
+          <header className="shrink-0 border-b border-white/10 px-5 py-4 sm:px-6">
+            <p className="lg:text-2xl lg:text-left font-semibold text-[var(--text-alt)] sm:text-center md:text-xl">
+              You're now debating with {opponentName || "Debate"}
             </p>
-          </div>
+          </header>
 
-          <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3 min-h-0">
-            <div className="flex-1" />
-            {messages.map((msg) =>
+          <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4 py-5 sm:px-6">
+            {visibleMessages.map((msg) =>
               msg.role === "opponent" ? (
-                /* Opponent messages — left aligned */
                 <div
                   key={msg.id}
-                  className="flex items-start gap-2 max-w-[80%]"
+                  className="flex max-w-[92%] items-start gap-3 sm:max-w-[78%]"
                 >
-                  <div className="w-15 h-15 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
-                    {<User color="var(--text)" size={30}/>}
+                  {/* Opponent's chat bubble */}
+                  <div className="mt-1 flex h-13 w-13 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 text-[var(--text) ]">
+                    <User color="var(--icon)" size={17} />
                   </div>
-                  <div className="bg-gray-100 rounded-tl-sm rounded-tr-xl rounded-br-xl rounded-bl-xl px-3 py-2 text-sm text-gray-800 leading-relaxed">
+                  <div className="rounded-2xl rounded-tl-md bg-[var(--bg)] px-4 py-3 text-xl leading-6 text-[var(--text)] shadow-sm">
                     {msg.text}
                   </div>
                 </div>
               ) : (
-                /* User message — right aligned */
+                // User's chat bubble
                 <div key={msg.id} className="flex justify-end">
-                  <div className="bg-gray-700 text-white rounded-tl-xl rounded-tr-sm rounded-br-xl rounded-bl-xl px-3 py-2 text-sm max-w-[75%] leading-relaxed">
+                  <div className="max-w-[92%] rounded-2xl rounded-tr-md bg-[var(--bg)] px-4 py-3 text-xl leading-6 text-[var(--text)] shadow-sm sm:max-w-[74%]">
                     {msg.text}
                   </div>
                 </div>
               ),
             )}
+
+            {/* Loading Indicator */}
             {isLoading && (
-              <div className="flex items-start gap-2 max-w-[80%]">
-                <div className="w-15 h-15 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
-                  {<User color="var(--text)" size={30}/>}
+              <div className="flex max-w-[78%] items-start gap-3">
+                <div className="mt-1 flex h-13 w-13 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 text-[var(--text)]">
+                  <User size={17} color="var(--icon)" />
                 </div>
-                <div className="bg-gray-100 rounded-tl-sm rounded-tr-xl rounded-br-xl rounded-bl-xl px-4 py-3 flex gap-1 items-center">
-                  <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce animation-delay-none" />
-                  <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce animation-delay-150ms" />
-                  <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce animation-delay-300ms" />
+                <div className="flex items-center gap-1 rounded-2xl text-xl italic rounded-tl-md bg-[var(--bg)] px-4 py-3 text-[var(--text)] shadow-sm transition-all duration-700 ease-in-out w-[290px]">
+                  <p className="loading text-md font-extralight" />
                 </div>
               </div>
             )}
-            {/*Used for the scrolling chat */}
+
             <div ref={bottomRef} />
           </div>
-          {/*Chat input and Button */}
-          <div
-            className="flex sticky bottom-0 px-4 py-3 border-t border-gray-200 gap-2 z-10 shrink-0"
-            style={{ backgroundColor: "#f9f8f6" }}
-          >
-            <input
-              className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-400"
-              placeholder="Type here"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-            />
-            {/*The microphone input for the user text box */}
-            <button
-              onClick={toggleListening}
-              title={isListening ? "Stop listening" : "Start listening"}
-              className="text-xl px-2"
-              style={{
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                color: isListening ? "red" : "gray",
-              }}
-            >
-              {isListening ? <MicOff size={20} /> : <Mic size={20} />}
-            </button>
-            {/*sends message to the backend and adds it to the chat */}
-            <button
-              onClick={sendMessage}
-              className="bg-gray-700 text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-800 transition shrink-0"
-            >
-              Send
-            </button>
+
+          {/* Chat Input */}
+          <footer className="shrink-0 border-t border-white/10 bg-[var(--surface)] p-3 sm:p-4">
+            <div className="flex items-end gap-2 rounded-2xl border border-white/10 bg-[var(--bg)] p-2 shadow-inner shadow-black/20">
+              <textarea
+                className="max-h-92 min-h-15 min-w-0 flex-1 resize-y bg-transparent px-2 py-2 text-xl leading-6 text-[var(--text)] outline-none placeholder:text-[var(--muted)]"
+                placeholder={`Message ${opponentName || "your opponent"}`}
+                rows={1}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    void sendMessage();
+                  }
+                }}
+              />
+              <button
+                onClick={toggleListening}
+                title={isListening ? "Stop listening" : "Start listening"}
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-[var(--text)] transition hover:bg-white/10 hover:text-[var(--accent)]"
+                type="button"
+              >
+                {isListening ? (
+                  <MicOff color="#ff6b6b" size={25} />
+                ) : (
+                  <Mic size={25} />
+                )}
+              </button>
+              <button
+                onClick={sendMessage}
+                disabled={!input.trim() || isLoading}
+                className="flex h-10 w-25 shrink-0 items-center text-md font-semibold justify-center rounded-xl text-[var(--text-alt)]  transition-shadow hover:shadow-[0_8px_25px_0_var(--muted-accent)] duration-700 ease-in-out max-w-120 max-h-25 bg-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-45"
+                title="Send"
+                type="button"
+              >
+                Send
+              </button>
+            </div>
+          </footer>
+        </section>
+
+        {/* Politician Stage */}
+        <aside className="flex min-h-[260px] shrink-0 flex-col overflow-hidden rounded-2xl border border-white/10 bg-[var(--surface)] shadow-2xl shadow-black/25 lg:h-full lg:w-[36%] lg:max-w-[460px] xl:w-[34%]">
+          <div className="shrink-0 border-b border-white/10 px-5 py-4">
+            <p className="text-md text-center font-medium text-[var(--text-alt)]">
+              Video of {opponentName || resolvedId || "your opponent"}
+              's response
+            </p>
           </div>
-        </div>
-        {/* right aligned stage: picks per-character frames from opponentName,
-            shows lip-sync video, else mouth-flap, else still */}
-        <div className="flex-1 h-full bg-black">
-          <PoliticianStage
-            opponentName={opponentName || resolvedId || "trump"}
-            imageUrl={opponentImage}
-            videoUrl={videoUrl}
-            audioBase64={audioB64}
-          />
-        </div>
+          <div className="h-full min-h-0 flex-1">
+            <PoliticianStage
+              opponentName={opponentName || resolvedId || "trump"}
+              imageUrl={opponentImage}
+              videoUrl={videoUrl}
+              audioBase64={audioB64}
+            />
+          </div>
+        </aside>
       </div>
     </main>
   );

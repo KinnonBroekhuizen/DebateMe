@@ -27,12 +27,105 @@
   }
 }
 
-body {
-  background-color: var(--bg);
-  color: var(--text);
-  font-family: Arial, Helvetica, sans-serif;
+html {
   transition: all;
   transition-timing-function: ease-in-out;
   transition-delay: 10ms;
   transition-duration: 500ms;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  min-height: 100vh;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.loading::before {
+  content: "";
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--text);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  flex-shrink: 0;
+  animation: spin 0.8s linear infinite;
+}
+
+.loading::after {
+  display: inline-block;
+  content: "Analyzing your request";
+  animation: loadingText 12s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes loadingText {
+  0% {
+    content: "Analysing your request...";
+    opacity: 0;
+  }
+  5%,
+  20% {
+    content: "Analysing your request...";
+    opacity: 1;
+  }
+  25% {
+    content: "Analysing your request...";
+    opacity: 0;
+  }
+
+  26% {
+    content: "Processing prompt...";
+    opacity: 0;
+  }
+  30%,
+  45% {
+    content: "Processing prompt...";
+    opacity: 1;
+  }
+  50% {
+    content: "Processing prompt...";
+    opacity: 0;
+  }
+
+  51% {
+    content: "Generating answer...";
+    opacity: 0;
+  }
+  55%,
+  70% {
+    content: "Generating answer...";
+    opacity: 1;
+  }
+  75% {
+    content: "Generating answer...";
+    opacity: 0;
+  }
+
+  76% {
+    content: "Formatting response...";
+    opacity: 0;
+  }
+  80%,
+  95% {
+    content: "Formatting response...";
+    opacity: 1;
+  }
+  100% {
+    content: "Formatting response...";
+    opacity: 0;
+  }
 }
