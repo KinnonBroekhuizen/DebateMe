@@ -13,10 +13,10 @@ export default function Home() {
       <main className="px-10 pt-16 pb-12">
         {/* Left Side */}
         <div className="">
-          <h2 className="text-6xl font-extrabold text-[var(--text)] leading-tight mb-6 animate-fade-down animate-once animate-ease-out">
+          <h2 className="lg:text-6xl md:text-3xl sm:text-7xl font-extrabold text-[var(--text)] leading-tight mb-6 animate-fade-down animate-once animate-ease-out">
             Debate with political people <br /> who shape nations.
           </h2>
-          <p className="text-2xl text-[var(--muted)] mb-16 max-w-xl leading-8 animate-fade-down animate-once animate-ease-out animate-delay-500">
+          <p className="lg:text-2xl sm:text-sm sm:leading-6 text-[var(--muted)] mb-16 max-w-xl lg:leading-8 animate-fade-down animate-once animate-ease-out animate-delay-500">
             Challenge Christopher Luxon and other political leaders on the
             issues that define our generations. This is where real debate
             happens.
@@ -57,7 +57,7 @@ export default function Home() {
 
       {/* Features Section */}
       <section className="px-10 pt-16 pb-24">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-45 max-w-9xl mx-auto bg-[var(--surface)] p-10 rounded-md text-[var(--text)] text-[var(--text-alt)]">
+        <div className="flex lg:flex-row sm:flex-col gap-45 mx-auto bg-[var(--surface)] p-10 rounded-md text-[var(--text)] text-[var(--text-alt)]">
           {/* Feature 1 */}
           <div className="flex flex-col items-center text-center gap-6">
             <div className="rounded-md p-4 w-50 h-40 flex items-center justify-center">
