@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import { useSpeechInput } from "./useSpeechInput";
 import PoliticianStage from "@/app/components/trump-stage/PoliticianStage";
 import { unlockAudio } from "@/app/components/trump-stage/audioContext";
-import { Mic, MicOff, User } from "react-feather";
+import { Mic, StopCircle, User } from "react-feather";
 
 type Message = {
   id: string;
@@ -73,7 +73,9 @@ export default function Chat() {
 
   const sendMessage = async () => {
     if (!input.trim() || isLoading) return;
-
+    if (isListening) {
+      toggleListening();
+    }
     unlockAudio();
     const currentInput = input.trim();
     const userMsg: Message = {
@@ -198,11 +200,11 @@ export default function Chat() {
               <button
                 onClick={toggleListening}
                 title={isListening ? "Stop listening" : "Start listening"}
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-[var(--text)] transition hover:bg-white/10 hover:text-[var(--accent)]"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-[var(--text)] transition hover:bg-white/10"
                 type="button"
               >
                 {isListening ? (
-                  <MicOff color="#ff6b6b" size={25} />
+                  <StopCircle color="#ff6b6b" size={25} />
                 ) : (
                   <Mic size={25} />
                 )}
@@ -210,7 +212,7 @@ export default function Chat() {
               <button
                 onClick={sendMessage}
                 disabled={!input.trim() || isLoading}
-                className="flex h-10 w-25 shrink-0 items-center text-md font-semibold justify-center rounded-xl text-[var(--text-alt)]  transition-shadow hover:shadow-[0_8px_25px_0_var(--muted-accent)] duration-700 ease-in-out max-w-120 max-h-25 bg-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-45"
+                className="flex h-10 w-25 shrink-0 items-center text-md font-semibold justify-center rounded-xl text-[var(--text)] opacity-100 transition-shadow hover:shadow-[0_8px_25px_0_var(--muted-accent)] duration-700 ease-in-out max-w-120 max-h-25 bg-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-45"
                 title="Send"
                 type="button"
               >
