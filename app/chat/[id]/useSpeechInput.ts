@@ -7,8 +7,8 @@ declare global {
   }
 }
 var SpeechRecognition: {
-    new (): SpeechRecognition;
-    prototype: SpeechRecognition;
+  new (): SpeechRecognition;
+  prototype: SpeechRecognition;
 };
 
 interface SpeechRecognition extends EventTarget {
@@ -34,7 +34,9 @@ interface SpeechRecognitionErrorEvent extends Event {
 export function useSpeechInput() {
   const [text, setText] = useState("");
   const [isListening, setIsListening] = useState(false);
-  const recognitionRef = useRef<InstanceType<typeof SpeechRecognition> | null>(null);
+  const recognitionRef = useRef<InstanceType<typeof SpeechRecognition> | null>(
+    null,
+  );
 
   const toggleListening = () => {
     if (isListening) {
@@ -66,8 +68,11 @@ export function useSpeechInput() {
     };
 
     recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
-      console.error("Speech error:", event.error);
-      setIsListening(false);
+      if (event.error === "not-allowed") {
+        alert(
+          "Microphone access was denied. Please allow permissions in your browser.",
+        );
+      }
     };
 
     recognition.onend = () => setIsListening(false);
