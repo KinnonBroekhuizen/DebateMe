@@ -1,24 +1,23 @@
-INFO:     Will watch for changes in these directories: ['C:\\Users\\kiday\\Documents\\DebateMe']
+INFO:     Will watch for changes in these directories: ['C:\\Users\\User\\Documents\\COMPX241 - 26A\\DebateMe']
 INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
-INFO:     Started reloader process [13420] using WatchFiles
-INFO:     Started server process [3964]
+INFO:     Started reloader process [3388] using WatchFiles
+INFO:     Started server process [18624]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
-INFO:     127.0.0.1:51416 - "OPTIONS /debate HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51416 - "POST /debate HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59233 - "POST /debate HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55435 - "OPTIONS /debate HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55435 - "POST /debate HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51164 - "POST /debate HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54721 - "POST /debate HTTP/1.1" 400 Bad Request
-INFO:     127.0.0.1:57451 - "POST /debate HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57528 - "POST /debate HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55938 - "OPTIONS /debate HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55938 - "POST /debate HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50983 - "POST /debate HTTP/1.1" 400 Bad Request
-INFO:     127.0.0.1:64712 - "POST /debate HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54447 - "OPTIONS /debate HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54447 - "POST /debate HTTP/1.1" 200 OK
-INFO:     127.0.0.1:63740 - "POST /debate HTTP/1.1" 200 OK
-INFO:     127.0.0.1:64598 - "POST /debate HTTP/1.1" 200 OK
-INFO:     127.0.0.1:64598 - "POST /debate HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51561 - "POST /debate HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62248 - "POST /debate HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62248 - "POST /debate HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58743 - "POST /debate HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52648 - "POST /debate HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52648 - "POST /debate HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65456 - "OPTIONS /debate HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65456 - "POST /debate HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65456 - "POST /debate HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63584 - "POST /debate HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63584 - "POST /debate HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53117 - "POST /debate HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53117 - "POST /debate HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62531 - "POST /debate HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61851 - "POST /debate HTTP/1.1" 200 OK
+INFO:     Shutting down
+INFO:     Stopping reloader process [3388]

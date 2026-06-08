@@ -134,7 +134,7 @@ export default function Chat() {
         >
           {/* Chat Header */}
           <header className="shrink-0 border-b border-white/10 px-5 py-4 sm:px-6">
-            <p className="lg:text-2xl lg:text-left font-semibold text-[var(--text)] sm:text-center md:text-xl">
+            <p className="lg:text-2xl lg:text-left font-semibold text-[var(--text-alt)] sm:text-center md:text-xl">
               You're now debating with {opponentName || "Debate"}
             </p>
           </header>
@@ -148,7 +148,7 @@ export default function Chat() {
                 >
                   {/* Opponent's chat bubble */}
                   <div className="mt-1 flex h-13 w-13 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 text-[var(--text) ]">
-                    <User size={17} />
+                    <User color="var(--icon)" size={17} />
                   </div>
                   <div className="rounded-2xl rounded-tl-md bg-[var(--bg)] px-4 py-3 text-xl leading-6 text-[var(--text)] shadow-sm">
                     {msg.text}
@@ -157,7 +157,7 @@ export default function Chat() {
               ) : (
                 // User's chat bubble
                 <div key={msg.id} className="flex justify-end">
-                  <div className="max-w-[92%] rounded-2xl rounded-tr-md bg-[var(--bg)] px-4 py-3 text-xl leading-6 text-[var(--text-alt)] shadow-sm sm:max-w-[74%]">
+                  <div className="max-w-[92%] rounded-2xl rounded-tr-md bg-[var(--bg)] px-4 py-3 text-xl leading-6 text-[var(--text)] shadow-sm sm:max-w-[74%]">
                     {msg.text}
                   </div>
                 </div>
@@ -168,10 +168,10 @@ export default function Chat() {
             {isLoading && (
               <div className="flex max-w-[78%] items-start gap-3">
                 <div className="mt-1 flex h-13 w-13 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 text-[var(--text)]">
-                  <User size={17} />
+                  <User size={17} color="var(--icon)" />
                 </div>
-                <div className="flex items-center gap-1 rounded-2xl text-xl italic rounded-tl-md bg-[var(--bg)] px-4 py-3 text-[var(--text)] shadow-sm">
-                  <p className="loading">Thinking of a reponse</p>
+                <div className="flex items-center gap-1 rounded-2xl text-xl italic rounded-tl-md bg-[var(--bg)] px-4 py-3 text-[var(--text)] shadow-sm transition-all duration-700 ease-in-out w-[290px]">
+                  <p className="loading text-md font-extralight" />
                 </div>
               </div>
             )}
@@ -198,7 +198,7 @@ export default function Chat() {
               <button
                 onClick={toggleListening}
                 title={isListening ? "Stop listening" : "Start listening"}
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-[var(--text)] transition hover:bg-white/10 hover:text-white"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-[var(--text)] transition hover:bg-white/10 hover:text-[var(--accent)]"
                 type="button"
               >
                 {isListening ? (
@@ -210,7 +210,7 @@ export default function Chat() {
               <button
                 onClick={sendMessage}
                 disabled={!input.trim() || isLoading}
-                className="flex h-10 w-25 shrink-0 items-center text-md font-semibold justify-center rounded-xl  transition-shadow hover:shadow-[0_8px_25px_0_var(--muted-accent)] duration-700 ease-in-out max-w-120 max-h-25 bg-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-45"
+                className="flex h-10 w-25 shrink-0 items-center text-md font-semibold justify-center rounded-xl text-[var(--text-alt)]  transition-shadow hover:shadow-[0_8px_25px_0_var(--muted-accent)] duration-700 ease-in-out max-w-120 max-h-25 bg-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-45"
                 title="Send"
                 type="button"
               >
@@ -223,7 +223,7 @@ export default function Chat() {
         {/* Politician Stage */}
         <aside className="flex min-h-[260px] shrink-0 flex-col overflow-hidden rounded-2xl border border-white/10 bg-[var(--surface)] shadow-2xl shadow-black/25 lg:h-full lg:w-[36%] lg:max-w-[460px] xl:w-[34%]">
           <div className="shrink-0 border-b border-white/10 px-5 py-4">
-            <p className="text-md text-center font-medium text-[var(--text)]">
+            <p className="text-md text-center font-medium text-[var(--text-alt)]">
               Video of {opponentName || resolvedId || "your opponent"}
               's response
             </p>
