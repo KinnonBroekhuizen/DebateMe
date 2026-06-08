@@ -37,13 +37,13 @@ export default function OpponentsPage() {
     fetchOpponents();
   }, []);
   return (
-    <div className="min-h-screen font-sans">
+    <div className="min-h-screen min-w-screen font-sans">
       <main className="px-10 pt-10 pb-20">
-        <h2 className="text-6xl font-extrabold mb-10 text-[var(--text)]">
+        <h2 className="lg:text-6xl lg:text-left font-extrabold mb-10 text-[var(--text)] md:text-3xl md:text-center">
           Select your opponent
         </h2>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+        <div className="grid sm:grid-rows-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
           {opponents.map((opponent) => (
             <Link
               key={opponent.id}
