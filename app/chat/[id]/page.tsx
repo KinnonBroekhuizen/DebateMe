@@ -170,7 +170,7 @@ export default function Chat() {
                 <div className="mt-1 flex h-13 w-13 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 text-[var(--text)]">
                   <User size={17} color="var(--icon)" />
                 </div>
-                <div className="flex items-center gap-1 rounded-2xl text-xl italic rounded-tl-md bg-[var(--bg)] px-4 py-3 text-[var(--text)] shadow-sm transition-all duration-700 ease-in-out w-[290px]">
+                <div className="flex items-center gap-1 rounded-2xl text-xl italic rounded-tl-md px-4 py-3 text-[var(--text)] shadow-sm">
                   <p className="loading text-md font-extralight" />
                 </div>
               </div>

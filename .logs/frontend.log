@@ -6,45 +6,30 @@
 - Local:         http://localhost:3000
 - Network:       http://192.168.56.1:3000
 - Environments: .env.local
-✓ Ready in 381ms
+✓ Ready in 913ms
 
- GET /chat/Luxon 200 in 912ms (next.js: 710ms, application-code: 202ms)
-✓ Compiled in 64ms
-✓ Compiled in 113ms
-✓ Compiled in 46ms
-✓ Compiled in 101ms
-✓ Compiled in 49ms
-✓ Compiled in 127ms
-✓ Compiled in 146ms
-✓ Compiled in 73ms
- GET /chat/Luxon 200 in 101ms (next.js: 64ms, application-code: 37ms)
-✓ Compiled in 21ms
- GET /chat/Luxon 200 in 70ms (next.js: 48ms, application-code: 22ms)
-✓ Compiled in 61ms
- GET /chat/Luxon 200 in 198ms (next.js: 131ms, application-code: 67ms)
-✓ Compiled in 43ms
- GET /chat/Luxon 200 in 82ms (next.js: 56ms, application-code: 26ms)
-✓ Compiled in 112ms
- GET /chat/Luxon 200 in 218ms (next.js: 154ms, application-code: 63ms)
-✓ Compiled in 68ms
-✓ Compiled in 177ms
-✓ Compiled in 126ms
+ GET / 200 in 1558ms (next.js: 835ms, application-code: 723ms)
+ GET /opponents 200 in 165ms (next.js: 100ms, application-code: 64ms)
+ GET /chat/Luxon 200 in 982ms (next.js: 898ms, application-code: 85ms)
+✓ Compiled in 1516ms
+ GET /chat/Luxon 200 in 376ms (next.js: 270ms, application-code: 106ms)
+✓ Compiled in 116ms
+ GET /chat/Luxon 200 in 231ms (next.js: 127ms, application-code: 105ms)
 ✓ Compiled in 56ms
-✓ Compiled in 57ms
-✓ Compiled in 44ms
- GET /chat/Luxon 200 in 91ms (next.js: 59ms, application-code: 32ms)
-✓ Compiled in 24ms
- GET /chat/Luxon 200 in 78ms (next.js: 49ms, application-code: 29ms)
-✓ Compiled in 33ms
- GET /chat/Luxon 200 in 64ms (next.js: 44ms, application-code: 21ms)
-✓ Compiled in 80ms
- GET /chat/Luxon 200 in 212ms (next.js: 144ms, application-code: 68ms)
+ GET /chat/Luxon 200 in 245ms (next.js: 141ms, application-code: 104ms)
+[browser] Speech error: network 
+    at recognition.onerror (file://C:/Users/User/Documents/COMPX241 - 26A/DebateMe/.next/dev/static/chunks/_0z4zq_d._.js:56:21) (file://C:/Users/User/Documents/COMPX241 - 26A/DebateMe/.next/dev/static/chunks/_0z4zq_d._.js:56:21)
+[browser] Speech error: network 
+    at recognition.onerror (file://C:/Users/User/Documents/COMPX241 - 26A/DebateMe/.next/dev/static/chunks/_0z4zq_d._.js:56:21) (file://C:/Users/User/Documents/COMPX241 - 26A/DebateMe/.next/dev/static/chunks/_0z4zq_d._.js:56:21)
+✓ Compiled in 52ms
+ GET /chat/Luxon 200 in 149ms (next.js: 102ms, application-code: 48ms)
+✓ Compiled in 55ms
+ GET /chat/Luxon 200 in 134ms (next.js: 96ms, application-code: 37ms)
+✓ Compiled in 152ms
+ GET /chat/Luxon 200 in 299ms (next.js: 208ms, application-code: 91ms)
 ✓ Compiled in 78ms
- GET /chat/Luxon 200 in 196ms (next.js: 136ms, application-code: 60ms)
-✓ Compiled in 153ms
- GET /chat/Luxon 200 in 194ms (next.js: 141ms, application-code: 53ms)
-✓ Compiled in 75ms
- GET /chat/Luxon 200 in 159ms (next.js: 112ms, application-code: 47ms)
-✓ Compiled in 37ms
- GET /chat/Luxon 200 in 67ms (next.js: 46ms, application-code: 21ms)
-[?25h
+ GET /chat/Luxon 200 in 284ms (next.js: 183ms, application-code: 101ms)
+✓ Compiled in 63ms
+ GET /chat/Luxon 200 in 203ms (next.js: 129ms, application-code: 75ms)
+✓ Compiled in 68ms
+ GET /chat/Luxon 200 in 177ms (next.js: 108ms, application-code: 69ms)
