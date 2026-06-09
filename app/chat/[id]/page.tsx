@@ -33,6 +33,7 @@ export default function Chat() {
   } = useSpeechInput();
   const [opponentName, setOpponentName] = useState<string>("");
   const [opponentImage, setOpponentImage] = useState<string | null>(null);
+  const [opponentWelcome, setOpponentWelcome] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
@@ -51,6 +52,7 @@ export default function Chat() {
       if (data) {
         setOpponentName(data.opponent_name);
         setOpponentImage(data.image_link ?? null);
+        setOpponentWelcome(data.welcome_text?? null);
       }
     };
     fetchData();
@@ -67,7 +69,7 @@ export default function Chat() {
           {
             id: "welcome",
             role: "opponent",
-            text: "Let's debate! Send a message to start the conversation.",
+            text: opponentWelcome || "Let's debate! Send a message to start the conversation.",
           },
         ];
 
@@ -95,7 +97,7 @@ export default function Chat() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           question: currentInput,
-          character: opponentName || resolvedId || "Donald Trump",
+          character: opponentName || resolvedId,
           history,
         }),
       });

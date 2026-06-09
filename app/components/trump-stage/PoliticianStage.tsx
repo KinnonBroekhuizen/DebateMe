@@ -79,7 +79,7 @@ export default function PoliticianStage({
 
   // No animated frames for this opponent → show their static image so the
   // stage isn't empty/broken. Audio (if any) still plays via the Replay button.
-  if (!frames) {
+  if (!frames || (!audioBase64)) {
     return (
       <div className="relative w-full h-full flex items-center justify-center">
         {imageUrl ? (
