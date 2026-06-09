@@ -15,9 +15,9 @@ export type MouthFrame = "closed" | "slight" | "half" | "open";
 
 function levelToFrame(open: boolean, level: number): MouthFrame {
   if (!open) return "closed";
-  if (level < 0.4) return "slight";
-  if (level < 0.75) return "half";
-  return "open";
+  if (level < 60 / 255) return "closed";
+  if (level < 90 / 255) return "slight";
+  if (level < 150 / 255) return "half";
 }
 
 function base64ToArrayBuffer(b64: string): ArrayBuffer {
