@@ -37,7 +37,7 @@ export default function OpponentsPage() {
     fetchOpponents();
   }, []);
   return (
-    <div className="min-h-screen min-w-screen font-sans">
+    <div className="min-h-screen overflow-x-hidden font-sans">
       <main className="px-10 pt-10 pb-20">
         <h2 className="lg:text-6xl lg:text-left font-extrabold mb-10 text-[var(--text)] md:text-3xl md:text-center">
           Select your opponent
