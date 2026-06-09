@@ -53,6 +53,7 @@ export default function Chat() {
         setOpponentName(data.opponent_name);
         setOpponentImage(data.image_link ?? null);
         setOpponentWelcome(data.welcome_text?? null);
+        setVideoUrl(data.welcome_video_url);
       }
     };
     fetchData();
@@ -174,7 +175,7 @@ export default function Chat() {
                 <div className="mt-1 flex h-13 w-13 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 text-[var(--text)]">
                   <User size={17} color="var(--icon)" />
                 </div>
-                <div className="flex items-center gap-1 rounded-2xl text-xl italic rounded-tl-md px-4 py-3 text-[var(--text)] shadow-sm">
+                <div className="flex items-center gap-1 rounded-2xl text-xl italic rounded-tl-md px-4 py-3 text-[var(--text)] shadow-sm text-white">
                   <p className="loading text-md font-extralight" />
                 </div>
               </div>
