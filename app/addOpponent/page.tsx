@@ -46,8 +46,10 @@ export default function AddOpponent() {
       image_link: photoInput,
       title: titleInput,
       video_url: publicUrl,
-      welcome_text: "We had a great country. We can have an even greater country. Americans want safe communities, good jobs, lower costs, and leaders who put their interests first. That's what we're fighting for. Ask me anything about our policies, our plans, and how we're going to bring back success, strength, and opportunity for every American. Thank you. It's going to be tremendous.",
-      welcome_video_url: "https://fatqkpkosagzfddyyist.supabase.co/storage/v1/object/public/videos/trump_intro_video.mp4",
+      welcome_text:
+        "We had a great country. We can have an even greater country. Americans want safe communities, good jobs, lower costs, and leaders who put their interests first. That's what we're fighting for. Ask me anything about our policies, our plans, and how we're going to bring back success, strength, and opportunity for every American. Thank you. It's going to be tremendous.",
+      welcome_video_url:
+        "https://fatqkpkosagzfddyyist.supabase.co/storage/v1/object/public/videos/trump_intro_video.mp4",
     });
 
     if (error) {
@@ -92,10 +94,10 @@ export default function AddOpponent() {
       <div className="w-full max-w-xl">
         {/* Header */}
         <div className="mb-10">
-          <h1 className="text-4xl font-extrabold leading-tight mb-3">
+          <h1 className="text-3xl md:text-4xl font-extrabold leading-tight mb-3">
             Add A New Opponent
           </h1>
-          <p className="text-(--muted) text-xl leading-relaxed">
+          <p className="text-(--muted) text-md md:text-xl leading-relaxed">
             Fill in all the required fields. Make sure the photo URL is publicly
             accessible and the MP4 file is around 20s of uncut, uninterrupted
             footage of your opponent talking.

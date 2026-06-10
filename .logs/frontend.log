@@ -4,36 +4,11 @@
 
 ▲ Next.js 16.2.4 (Turbopack)
 - Local:         http://localhost:3000
-- Network:       http://10.5.0.2:3000
-- Environments: .env.local
-✓ Ready in 577ms
+- Network:       http://192.168.56.1:3000
+- Environments: .env
+✓ Ready in 862ms
 
- GET /chat/Luxon 200 in 1079ms (next.js: 774ms, application-code: 305ms)
- GET / 200 in 231ms (next.js: 162ms, application-code: 70ms)
- GET /opponents 200 in 186ms (next.js: 136ms, application-code: 50ms)
- GET /chat/Luxon 200 in 101ms (next.js: 34ms, application-code: 67ms)
- GET / 200 in 86ms (next.js: 17ms, application-code: 69ms)
- GET /opponents 200 in 70ms (next.js: 13ms, application-code: 57ms)
- GET /chat/Hipkins 200 in 118ms (next.js: 39ms, application-code: 79ms)
- GET / 200 in 221ms (next.js: 30ms, application-code: 191ms)
- GET /opponents 200 in 85ms (next.js: 17ms, application-code: 68ms)
- GET /chat/Hipkins 200 in 87ms (next.js: 36ms, application-code: 51ms)
-✓ Compiled in 1271ms
- GET /chat/Hipkins 200 in 643ms (next.js: 233ms, application-code: 410ms)
- GET /chat/Hipkins 200 in 250ms (next.js: 79ms, application-code: 171ms)
- GET /chat/Hipkins 200 in 105ms (next.js: 10ms, application-code: 95ms)
- GET / 200 in 363ms (next.js: 50ms, application-code: 313ms)
- GET /opponents 200 in 152ms (next.js: 52ms, application-code: 101ms)
- GET /chat/Hipkins 200 in 83ms (next.js: 29ms, application-code: 54ms)
- GET / 200 in 72ms (next.js: 13ms, application-code: 59ms)
- GET /opponents 200 in 68ms (next.js: 17ms, application-code: 52ms)
- GET /chat/Trump 200 in 112ms (next.js: 40ms, application-code: 72ms)
- GET / 200 in 64ms (next.js: 11ms, application-code: 53ms)
- GET /opponents 200 in 66ms (next.js: 13ms, application-code: 53ms)
- GET /chat/Trump 200 in 71ms (next.js: 25ms, application-code: 46ms)
- GET / 200 in 74ms (next.js: 12ms, application-code: 61ms)
- GET /opponents 200 in 62ms (next.js: 13ms, application-code: 48ms)
- GET /chat/Hipkins 200 in 90ms (next.js: 29ms, application-code: 60ms)
-✓ Compiled in 176ms
- GET /chat/Hipkins 200 in 218ms (next.js: 117ms, application-code: 101ms)
- GET /chat/Hipkins 200 in 28ms (next.js: 5ms, application-code: 23ms)
+ GET / 200 in 1039ms (next.js: 432ms, application-code: 608ms)
+ GET /opponents 200 in 170ms (next.js: 106ms, application-code: 64ms)
+ GET /chat/Hipkins 200 in 813ms (next.js: 756ms, application-code: 57ms)
+[?25h

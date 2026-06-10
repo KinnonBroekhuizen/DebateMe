@@ -10,28 +10,28 @@ export default function Home() {
   return (
     <div className="min-h-screen font-sans">
       {/* Hero Section */}
-      <main className="px-10 pt-16 pb-12">
+      <main className="px-10 pt-9 md:pt-19">
         {/* Left Side */}
         <div className="">
-          <h2 className="lg:text-6xl md:text-3xl sm:text-7xl font-extrabold text-[var(--text)] leading-tight mb-6 animate-fade-down animate-once animate-ease-out">
+          <h2 className="lg:text-6xl text-2xl font-extrabold text-[var(--text)] leading-tight mb-2 md:mb-6 animate-fade-down animate-once animate-ease-out">
             Debate with political people <br /> who shape nations.
           </h2>
-          <p className="lg:text-2xl sm:text-sm sm:leading-6 text-[var(--muted)] mb-16 max-w-xl lg:leading-8 animate-fade-down animate-once animate-ease-out animate-delay-500">
+          <p className="lg:text-2xl text-sm sm:leading-6 text-[var(--muted)] mb-9 md:mb-16 max-w-xl lg:leading-8 animate-fade-down animate-once animate-ease-out animate-delay-500">
             Challenge Christopher Luxon and other political leaders on the
             issues that define our generations. This is where real debate
             happens.
           </p>
 
           {/* Buttons */}
-          <div className="justify-end flex gap-4 text-[var(--text-alt)]">
+          <div className="justify-end flex lg:flex-row flex-col md:gap-6 gap-2 text-[var(--text-alt)]">
             <Link
               href="/opponents"
-              className="p-7 flex justify-between flex-row items-center gap-5 rounded-md transition-shadow hover:shadow-[0_8px_25px_0_var(--muted-accent)] duration-700 ease-in-out max-w-120 max-h-25 bg-[var(--accent)]"
+              className="p-7 flex justify-between flex-row items-center gap-5 rounded-md transition-shadow hover:shadow-[0_15px_30px_0_var(--muted-accent)] duration-700 ease-in-out max-w-120 max-h-25 bg-[var(--accent)]"
             >
               <MessageSquare size={100} />
               <div>
-                <span className="font-bold text-xl pb-10">Start Debating</span>
-                <p className="text-md leading-snug opacity-80">
+                <span className="font-bold text-2xl pb-10">Start Debating</span>
+                <p className="md:text-md text-sm/2 leading-snug opacity-80">
                   Go head-to-head with a political leader. Pick your opponent
                   and make your case in real time.
                 </p>
@@ -44,8 +44,8 @@ export default function Home() {
             >
               <UserPlus size={100} />
               <div>
-                <span className="font-bold text-xl">Add Opponent</span>
-                <p className="text-md leading-snug opacity-80">
+                <span className="font-bold text-2xl">Add Opponent</span>
+                <p className="md:text-md text-sm leading-snug opacity-80">
                   Know a leader missing from the list? Submit them and bring
                   them into the arena.
                 </p>
@@ -57,7 +57,7 @@ export default function Home() {
 
       {/* Features Section */}
       <section className="px-10 pt-16 pb-24">
-        <div className="flex lg:flex-row sm:flex-col gap-45 mx-auto bg-[var(--surface)] p-10 rounded-md text-[var(--text)] text-[var(--text-alt)]">
+        <div className="flex md:flex-row flex-col gap-2 md:gap-45 mx-auto bg-[var(--surface)] p-10 rounded-md text-[var(--text)] text-[var(--text-alt)]">
           {/* Feature 1 */}
           <div className="flex flex-col items-center text-center gap-6">
             <div className="rounded-md p-4 w-50 h-40 flex items-center justify-center">

@@ -52,7 +52,7 @@ export default function Chat() {
       if (data) {
         setOpponentName(data.opponent_name);
         setOpponentImage(data.image_link ?? null);
-        setOpponentWelcome(data.welcome_text?? null);
+        setOpponentWelcome(data.welcome_text ?? null);
         setVideoUrl(data.welcome_video_url);
       }
     };
@@ -70,7 +70,9 @@ export default function Chat() {
           {
             id: "welcome",
             role: "opponent",
-            text: opponentWelcome || "Let's debate! Send a message to start the conversation.",
+            text:
+              opponentWelcome ||
+              "Let's debate! Send a message to start the conversation.",
           },
         ];
 
