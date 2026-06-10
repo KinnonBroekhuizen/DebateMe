@@ -38,8 +38,10 @@ export default function AddOpponent() {
     } = supabase.storage.from("videos").getPublicUrl(fileName);
     const nameArray = nameInput.split(" ");
     const idToAdd = nameArray[nameArray.length - 1];
-    //uploads all fields into a new row of the database
-    const { error } = await supabase.from("ChatIdentifiers").insert({
+    //upsert: id is derived from the surname, so re-adding an existing
+    //opponent (e.g. Trump) updates their row instead of failing with a
+    //duplicate-key error and never appearing
+    const { error } = await supabase.from("ChatIdentifiers").upsert({
       id: idToAdd,
       opponent_name: nameInput,
       Information: infoInput,
