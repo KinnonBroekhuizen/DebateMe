@@ -30,7 +30,7 @@ export default function Home() {
             >
               <MessageSquare size={100} />
               <div>
-                <span className="font-bold text-2xl pb-10">Start Debating</span>
+                <span className="font-bold text-xl pb-10">Start Debating</span>
                 <p className="md:text-md text-sm/2 leading-snug opacity-80">
                   Go head-to-head with a political leader. Pick your opponent
                   and make your case in real time.
@@ -44,7 +44,7 @@ export default function Home() {
             >
               <UserPlus size={100} />
               <div>
-                <span className="font-bold text-2xl">Add Opponent</span>
+                <span className="font-bold text-xl">Add Opponent</span>
                 <p className="md:text-md text-sm leading-snug opacity-80">
                   Know a leader missing from the list? Submit them and bring
                   them into the arena.
@@ -59,33 +59,33 @@ export default function Home() {
       <section className="px-10 pt-16 pb-24">
         <div className="flex md:flex-row flex-col gap-2 md:gap-45 mx-auto bg-[var(--surface)] p-10 rounded-md text-[var(--text)] text-[var(--text-alt)]">
           {/* Feature 1 */}
-          <div className="flex flex-col items-center text-center gap-6">
+          <div className="flex flex-col items-center text-center gap-2 md:gap-6">
             <div className="rounded-md p-4 w-50 h-40 flex items-center justify-center">
-              <Clock size={120} />
+              <Clock className="size-20 md:size-30" />
             </div>
-            <p className="text-2xl font-semibold leading-snug">
+            <p className="text-md md:text-2xl font-semibold leading-snug">
               Challenge Christopher Luxon and other political leaders in real
               time.
             </p>
           </div>
 
           {/* Feature 2 */}
-          <div className="flex flex-col items-center text-center gap-6">
+          <div className="flex flex-col items-center text-center gap-2 md:gap-6">
             <div className="p-4 w-50 h-40 flex items-center justify-center">
-              <HelpCircle size={120} />
+              <HelpCircle className="size-20 md:size-30" />
             </div>
-            <p className="text-2xl font-semibold leading-snug">
+            <p className="text-md md:text-2xl font-semibold leading-snug">
               Your questions shape the conversation and hold leaders
               accountable.
             </p>
           </div>
 
           {/* Feature 3 */}
-          <div className="flex flex-col items-center text-center gap-6">
+          <div className="flex flex-col items-center text-center gap-2 md:gap-6">
             <div className="rounded-md p-4 w-50 h-40 flex items-center justify-center">
-              <FileText size={120} />
+              <FileText className="size-20 md:size-30" />
             </div>
-            <p className="text-2xl font-semibold  leading-snug">
+            <p className="text-md md:text-2xl font-semibold  leading-snug">
               Watch unscripted exchanges where ideas collide and truth emerges.
             </p>
           </div>
