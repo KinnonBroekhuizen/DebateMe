@@ -46,6 +46,8 @@ export default function AddOpponent() {
       image_link: photoInput,
       title: titleInput,
       video_url: publicUrl,
+      welcome_text: "We had a great country. We can have an even greater country. Americans want safe communities, good jobs, lower costs, and leaders who put their interests first. That's what we're fighting for. Ask me anything about our policies, our plans, and how we're going to bring back success, strength, and opportunity for every American. Thank you. It's going to be tremendous.",
+      welcome_video_url: "https://fatqkpkosagzfddyyist.supabase.co/storage/v1/object/public/videos/trump_intro_video.mp4",
     });
 
     if (error) {
