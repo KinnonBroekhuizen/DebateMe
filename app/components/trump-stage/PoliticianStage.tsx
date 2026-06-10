@@ -1,4 +1,5 @@
 "use client";
+import { useEffect, useRef, useState } from "react";
 import { useMouthFlap, type MouthFrame } from "./useMouthFlap";
 
 // ── Add new politicians here ──────────────────────────────────────────────────
@@ -18,11 +19,22 @@ const POLITICIAN_FRAMES: Record<string, {
     half:   "/trump/mouth-half.webp",
     open:   "/trump/mouth-open.webp",
   },
+  // .webp frames are 960x540 re-encodes (~12-40KB each) of the 1920x1080
+  // source .pngs (~900KB each). The pngs choked rendering on phones/tunnels:
+  // 3.6MB of frames started downloading only when the first reply landed,
+  // painting top-down ("only the top quarter shows"). Regenerate with cwebp
+  // if the source pngs change.
   hipkins: {
     closed: "/hipkins/mouth-closed.webp",
     slight: "/hipkins/mouth-slight.webp",
     half:   "/hipkins/mouth-half.webp",
     open:   "/hipkins/mouth-open.webp",
+  },
+  luxon: {
+    closed: "/luxon/mouth-closed.webp",
+    slight: "/luxon/mouth-slight.webp",
+    half:   "/luxon/mouth-half.webp",
+    open:   "/luxon/mouth-open.webp",
   },
 };
 
@@ -59,21 +71,95 @@ export default function PoliticianStage({
   videoUrl,
   audioBase64,
 }: PoliticianStageProps) {
-  const { frame, playing, play } = useMouthFlap(audioBase64);
+  // <video> failures (expired link, unsupported codec, network) fire onError
+  // and never paint a frame — track them so we drop to the mouth-flap/static
+  // fallback instead of leaving a silent black rectangle on stage.
+  const [videoFailed, setVideoFailed] = useState(false);
+  // Browsers refuse unmuted autoplay without a sufficiently recent user
+  // gesture (always on first page load; Safari even after Send, because the
+  // lip-sync response lands minutes after the click). When play() rejects we
+  // ask for a tap rather than showing a paused, frameless black box.
+  const [needsTap, setNeedsTap] = useState(false);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
 
-  // null when this opponent has no shipped frame set (e.g. Luxon, custom adds)
+  const isVideoOnStage = Boolean(videoUrl) && !videoFailed;
+
+  // The lip-sync video carries its own audio track. While it's on stage, keep
+  // the mouth-flap idle (its effect auto-plays the MP3) so the two audio
+  // sources don't speak over each other; if the video errors out, the MP3 is
+  // handed back to the mouth-flap which then plays as the fallback.
+  const { frame, playing, play } = useMouthFlap(
+    isVideoOnStage ? null : audioBase64,
+  );
+
+  // A new clip must not inherit the previous clip's failed/tap state — reset
+  // during render (React's "adjusting state when a prop changes" pattern).
+  const [prevVideoUrl, setPrevVideoUrl] = useState(videoUrl);
+  if (prevVideoUrl !== videoUrl) {
+    setPrevVideoUrl(videoUrl);
+    setVideoFailed(false);
+    setNeedsTap(false);
+  }
+
+  useEffect(() => {
+    if (!videoUrl) return;
+    const video = videoRef.current;
+    if (!video) return;
+    video
+      .play()
+      .then(() => setNeedsTap(false))
+      .catch(() => setNeedsTap(true));
+  }, [videoUrl]);
+
+  const tapToPlay = () => {
+    // Called from a click, so the gesture satisfies the autoplay policy.
+    videoRef.current
+      ?.play()
+      .then(() => setNeedsTap(false))
+      .catch(() => setNeedsTap(true));
+  };
+
+  // null when this opponent has no shipped frame set (custom adds)
   const frames = resolveFrames(opponentName);
 
+  // Warm the frame images into the browser cache on mount, not at first
+  // reply — otherwise the first animation races its own asset downloads and
+  // the mouth visibly pops in half-rendered.
+  useEffect(() => {
+    if (!frames) return;
+    Object.values(frames).forEach((src) => {
+      const img = new Image();
+      img.src = src;
+    });
+  }, [frames]);
+
   // Highest fidelity: real lip-sync video.
-  if (videoUrl) {
+  if (videoUrl && !videoFailed) {
     return (
-      <video
-        key={videoUrl}
-        className="w-full h-full object-cover"
-        src={videoUrl}
-        autoPlay
-        playsInline
-      />
+      <div className="relative w-full h-full">
+        <video
+          ref={videoRef}
+          key={videoUrl}
+          className="w-full h-full object-cover"
+          src={videoUrl}
+          poster={imageUrl ?? undefined}
+          autoPlay
+          playsInline
+          preload="auto"
+          onError={() => setVideoFailed(true)}
+        />
+        {needsTap && (
+          <button
+            onClick={tapToPlay}
+            className="absolute inset-0 flex items-center justify-center bg-black/40 transition hover:bg-black/30"
+            type="button"
+          >
+            <span className="bg-white/90 text-black text-sm font-semibold px-4 py-2 rounded-lg shadow">
+              ▶ Play response
+            </span>
+          </button>
+        )}
+      </div>
     );
   }
 

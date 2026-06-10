@@ -2,10 +2,17 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getAudioContext } from "./audioContext";
 
+// Animation math mirrors speechanimation.js from the DebateMeTest repo
+// (the reference implementation): average the voice-frequency bins 2-18 of a
+// 256-point FFT into one raw 0-255 loudness value, then bucket it straight
+// into a mouth frame. No normalisation step — the thresholds below were
+// hand-tuned against Fish Audio's output volume.
 const FFT_SIZE = 256;
 const VOICE_BAND_START = 2;
 const VOICE_BAND_END = 18;
-const LOUDNESS_THRESHOLD = 60; // lowered from 150 to work with 4 frames
+const CLOSED_BELOW = 80;
+const SLIGHT_BELOW = 110;
+const HALF_BELOW = 150;
 
 // Loudness buckets -> which mouth frame to show. Kept here (not in the
 // component) so the rAF loop can skip React re-renders unless the bucket
@@ -13,11 +20,11 @@ const LOUDNESS_THRESHOLD = 60; // lowered from 150 to work with 4 frames
 // between 4 states, so we'd otherwise re-render ~60x/sec for nothing.
 export type MouthFrame = "closed" | "slight" | "half" | "open";
 
-function levelToFrame(open: boolean, level: number): MouthFrame {
-  if (!open) return "closed";
-  if (level < (60 / 255)) return "slight";
-  if (level < (90 / 255)) return "half";
-  else return "open";
+function levelToFrame(avg: number): MouthFrame {
+  if (avg < CLOSED_BELOW) return "closed";
+  if (avg < SLIGHT_BELOW) return "slight";
+  if (avg < HALF_BELOW) return "half";
+  return "open";
 }
 
 function base64ToArrayBuffer(b64: string): ArrayBuffer {
@@ -90,8 +97,7 @@ export function useMouthFlap(audioBase64: string | null | undefined): MouthFlap 
       analyser.getByteFrequencyData(dataArray);
       const band = dataArray.slice(VOICE_BAND_START, VOICE_BAND_END);
       const avg = band.reduce((a, b) => a + b, 0) / band.length;
-      const level = Math.min(avg / 130, 1); // normalise to 0-1
-      setFrameIfChanged(levelToFrame(avg > LOUDNESS_THRESHOLD, level));
+      setFrameIfChanged(levelToFrame(avg));
       rafRef.current = requestAnimationFrame(tick);
     };
     tick();
