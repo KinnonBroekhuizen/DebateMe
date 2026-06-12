@@ -71,7 +71,7 @@ body {
     transform: rotate(360deg);
   }
 }
-
+/* AI generated using Claude */
 @keyframes loadingText {
   0% {
     content: "Analysing your request...";
